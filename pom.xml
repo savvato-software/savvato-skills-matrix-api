@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.savvato</groupId>
-	<artifactId>base-mobile-app</artifactId>
+	<artifactId>skills-matrix-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>skillsmatrix</name>
-	<description>A functional, basic implementation of the backend for a user-based mobile app.</description>
+	<name>skills-matrix-api</name>
+	<description>An API which manages and provides access to skills matrices.</description>
 	<properties>
 		<java.version>19</java.version>
 		<maven.compiler.source>19</maven.compiler.source>
