@@ -31,12 +31,12 @@ public class SkillsMatrix {
 	
     @ManyToMany
 	@JoinTable(
-		name="tech_profile_topic_map"
+		name="skills_matrix_topic_map"
 		, joinColumns={
-			@JoinColumn(name="techProfileId")
+			@JoinColumn(name="skills_matrix_id")
 			}
 		, inverseJoinColumns={
-			@JoinColumn(name="techProfileTopicId")
+			@JoinColumn(name="skills_matrix_topic_id")
 			}
 		)
 	private Set<SkillsMatrixTopic> topics;

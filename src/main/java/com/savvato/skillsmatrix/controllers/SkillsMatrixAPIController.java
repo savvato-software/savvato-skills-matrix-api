@@ -1,7 +1,6 @@
 package com.savvato.skillsmatrix.controllers;
 
 import com.savvato.skillsmatrix.constants.Constants;
-import com.savvato.skillsmatrix.controllers.dto.SkillsMatrixDTO;
 import com.savvato.skillsmatrix.controllers.dto.SkillsMatrixSummaryDTO;
 import com.savvato.skillsmatrix.entities.SkillsMatrix;
 import com.savvato.skillsmatrix.entities.SkillsMatrixLineItem;
@@ -37,12 +36,6 @@ public class SkillsMatrixAPIController {
 
     @RequestMapping(value = { "/api/v1/skills-matrix"}, method = RequestMethod.GET)
     public ResponseEntity<List<SkillsMatrixSummaryDTO>> getAll() {
-
-        return null;
-    }
-
-    @RequestMapping(value = { "/api/v1/skills-matrix/{userId}"}, method = RequestMethod.GET)
-    public ResponseEntity<List<SkillsMatrixDTO>> getById() {
 
         return null;
     }
