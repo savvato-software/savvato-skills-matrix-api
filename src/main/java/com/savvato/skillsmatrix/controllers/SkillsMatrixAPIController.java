@@ -1,7 +1,7 @@
 package com.savvato.skillsmatrix.controllers;
 
 import com.savvato.skillsmatrix.constants.Constants;
-import com.savvato.skillsmatrix.controllers.dto.SkillsMatrixSummaryDTO;
+import com.savvato.skillsmatrix.dto.SkillsMatrixSummaryDTO;
 import com.savvato.skillsmatrix.entities.SkillsMatrix;
 import com.savvato.skillsmatrix.entities.SkillsMatrixLineItem;
 import com.savvato.skillsmatrix.entities.SkillsMatrixTopic;

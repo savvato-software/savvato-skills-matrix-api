@@ -1,4 +1,4 @@
-package com.savvato.skillsmatrix.controllers.dto;
+package com.savvato.skillsmatrix.dto;
 
 public class SkillsMatrixSummaryDTO {
 
