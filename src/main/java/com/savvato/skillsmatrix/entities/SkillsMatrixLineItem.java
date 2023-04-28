@@ -1,6 +1,7 @@
 package com.savvato.skillsmatrix.entities;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 public class SkillsMatrixLineItem {
@@ -27,49 +28,25 @@ public class SkillsMatrixLineItem {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	///
-	private String l0_description;
-	
-	public String getL0Description() {
-		return l0_description;
+
+	@ManyToMany
+	@JoinTable(
+			name="skills_matrix_line_item_skill_map"
+			, joinColumns={
+			@JoinColumn(name="skillsMatrixLineItemId")
 	}
-	
-	public void setL0Description(String str) {
-		this.l0_description = str;
+			, inverseJoinColumns={
+			@JoinColumn(name="skillsMatrixSkillId")
 	}
-	
-	///
-	private String l1_description;
-	
-	public String getL1Description() {
-		return l1_description;
+	)
+	private Set<SkillsMatrixSkill> skills;
+
+	public Set<SkillsMatrixSkill> getSkills() {
+		return skills;
 	}
-	
-	public void setL1Description(String str) {
-		this.l1_description = str;
-	}
-	
-	///
-	private String l2_description;
-	
-	public String getL2Description() {
-		return l2_description;
-	}
-	
-	public void setL2Description(String str) {
-		this.l2_description = str;
-	}
-	
-	///
-	private String l3_description;
-	
-	public String getL3Description() {
-		return l3_description;
-	}
-	
-	public void setL3Description(String str) {
-		this.l3_description = str;
+
+	public void setSkills(Set<SkillsMatrixSkill> skills) {
+		this.skills = skills;
 	}
 
     @Transient
@@ -83,12 +60,8 @@ public class SkillsMatrixLineItem {
     	this.sequence = seq;
     }
 
-    public SkillsMatrixLineItem(String name, String l0_description, String l1_description, String l2_description, String l3_description) {
+    public SkillsMatrixLineItem(String name) {
 		this.name = name;
-		this.l0_description = l0_description;
-		this.l1_description = l1_description;
-		this.l2_description = l2_description;
-		this.l3_description = l3_description;
 	}
 	
 	public SkillsMatrixLineItem() {
@@ -96,6 +69,6 @@ public class SkillsMatrixLineItem {
 	}
 	
 	public String toString() {
-		return this.id + " " + this.name + " |" + this.l0_description+ " |" + this.l1_description+ " |" + this.l2_description+ " |" + this.l3_description;
+		return this.id + " " + this.name;
 	}
 }

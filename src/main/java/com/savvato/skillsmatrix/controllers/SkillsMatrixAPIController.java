@@ -89,7 +89,7 @@ public class SkillsMatrixAPIController {
         if (l2desc == null) l2desc = "Level 3 skill.";
         if (l3desc == null) l3desc = "Level 4 skill.";
 
-        return skillsMatrixService.addLineItem(id, name, l0desc, l1desc, l2desc, l3desc);
+        return skillsMatrixService.addLineItem(id, name);
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/lineitem/{lineItemId}" }, method=RequestMethod.GET)
@@ -114,11 +114,7 @@ public class SkillsMatrixAPIController {
 
             rtn = skillsMatrixService.updateLineItem(
                     Long.parseLong(obj.getAsString("id")),
-                    obj.getAsString("name"),
-                    obj.getAsString(Constants.L0DESCRIPTION),
-                    obj.getAsString(Constants.L1DESCRIPTION),
-                    obj.getAsString(Constants.L2DESCRIPTION),
-                    obj.getAsString(Constants.L3DESCRIPTION));
+                    obj.getAsString("name"));
 
         } catch (IOException | ParseException e) {
             // TODO Auto-generated catch block

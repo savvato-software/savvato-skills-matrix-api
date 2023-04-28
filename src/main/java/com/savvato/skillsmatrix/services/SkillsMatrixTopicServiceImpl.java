@@ -39,7 +39,7 @@ public class SkillsMatrixTopicServiceImpl implements SkillsMatrixTopicService {
 			if (existingLineItemIdOptional.isPresent()) {
 				SkillsMatrixLineItem _existingLineItem = existingLineItemIdOptional.get();
 
-				List resultList = em.createNativeQuery("SELECT max(sequence) FROM tech_profile_topic_line_item_map where tech_profile_topic_id=:topicId")
+				List resultList = em.createNativeQuery("SELECT max(sequence) FROM skills_matrix_topic_line_item_map where skills_matrix_topic_id=:topicId")
 						.setParameter("topicId", _topic.getId())
 						.getResultList();
 
@@ -48,7 +48,7 @@ public class SkillsMatrixTopicServiceImpl implements SkillsMatrixTopicService {
 				if (resultList.size() > 0 && resultList.get(0) != null)
 					currentMaxSequenceNum = Long.parseLong(resultList.get(0).toString());
 				
-				em.createNativeQuery("INSERT INTO tech_profile_topic_line_item_map (tech_profile_topic_id, tech_profile_line_item_id, sequence) VALUES (:topicId, :lineItemId, :sequence)")
+				em.createNativeQuery("INSERT INTO skills_matrix_topic_line_item_map (skills_matrix_topic_id, skills_matrix_line_item_id, sequence) VALUES (:topicId, :lineItemId, :sequence)")
 					.setParameter("topicId", _topic.getId())
 					.setParameter("lineItemId", _existingLineItem.getId())
 					.setParameter("sequence", currentMaxSequenceNum + 1)

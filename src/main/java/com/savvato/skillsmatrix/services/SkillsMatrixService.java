@@ -14,9 +14,9 @@ public interface SkillsMatrixService {
 	public SkillsMatrixTopic addTopic(String topicName);
 	public SkillsMatrixTopic updateTopic(Long topicId, String name);
 
-	public SkillsMatrixLineItem addLineItem(Long topicId, String lineItemName, String l0desc, String l1desc, String l2desc, String l3desc);
+	public SkillsMatrixLineItem addLineItem(Long topicId, String lineItemName);
 	public Optional<SkillsMatrixLineItem> getLineItem(Long lineItemId);
-	public SkillsMatrixLineItem updateLineItem(Long lineItemId, String lineItemName, String l0desc, String l1desc, String l2desc, String l3desc);
+	public SkillsMatrixLineItem updateLineItem(Long lineItemId, String lineItemName);
 	
 	public boolean updateSequencesRelatedToATopicAndItsLineItems(long[] arr);
 }

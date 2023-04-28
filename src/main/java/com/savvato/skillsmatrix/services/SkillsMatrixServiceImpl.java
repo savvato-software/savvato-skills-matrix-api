@@ -2,6 +2,7 @@ package com.savvato.skillsmatrix.services;
 
 import com.savvato.skillsmatrix.entities.SkillsMatrix;
 import com.savvato.skillsmatrix.entities.SkillsMatrixLineItem;
+import com.savvato.skillsmatrix.entities.SkillsMatrixSkill;
 import com.savvato.skillsmatrix.entities.SkillsMatrixTopic;
 import com.savvato.skillsmatrix.repositories.SkillsMatrixLineItemRepository;
 import com.savvato.skillsmatrix.repositories.SkillsMatrixRepository;
@@ -40,6 +41,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		
 		List topicSequences = getTopicSequences(id);
 		List lineItemSequences = getLineItemSequences(id);
+		List skillSequences = getSkillSequences(id);
 		
 		SkillsMatrix sm = null;
 		
@@ -49,7 +51,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 			
 			sm = opt.get();
 			
-			// make sure we have unique instances of each techprofilelineitem... because a topic can share a line item with another topic.
+			// make sure we have unique instances of each skillsmatrixlineitem... because a topic can share a line item with another topic.
 			// if it does, by default, both topics will have the same instance. This is a problem, because the sequence that the topic appears
 			// within a topic, can be different for each topic. You need unique instances to represent that.
 			
@@ -65,7 +67,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 					if (idsArr.contains(li.getId())) {
 
 						//   if so, create a new instance, remove the old instance, replace with the new
-						SkillsMatrixLineItem newLineItem = new SkillsMatrixLineItem(li.getName(), li.getL0Description(), li.getL1Description(), li.getL2Description(), li.getL3Description());
+						SkillsMatrixLineItem newLineItem = new SkillsMatrixLineItem(li.getName());
 						newLineItem.setId(li.getId());
 						set2.add(newLineItem);
 
@@ -97,6 +99,17 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 					SkillsMatrixLineItem smli = smliIterator.next();
 					
 					setSequenceOnLineItem(topic.getId(), smli, lineItemSequences);
+
+					Set<SkillsMatrixSkill> skills = smli.getSkills();
+					if (skills != null) {
+						Iterator<SkillsMatrixSkill> skillsIterator = skills.iterator();
+
+						while (skillsIterator.hasNext()) {
+							SkillsMatrixSkill skill = skillsIterator.next();
+
+							setSequenceAndLevelOnSkill(topic.getId(), smli.getId(), skill, skillSequences);
+						}
+					}
 				}
 			}
 		}
@@ -127,12 +140,13 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	
 	@Override
 	@Transactional
-	public SkillsMatrixLineItem addLineItem(Long topicId, String lineItemName, String l0desc, String l1desc, String l2desc, String l3desc) {
-		SkillsMatrixLineItem rtn = skillsMatrixLineItemRepository.save(new SkillsMatrixLineItem(lineItemName, l0desc, l1desc, l2desc, l3desc));
+	public SkillsMatrixLineItem addLineItem(Long topicId, String lineItemName) {
+		SkillsMatrixLineItem rtn = skillsMatrixLineItemRepository.save(new SkillsMatrixLineItem(lineItemName));
 
-		List resultList = em.createNativeQuery("SELECT max(sequence) FROM skills_matrix_topic_line_item_map where skills_matrix_topic_id=:topicId")
-		.setParameter("topicId", topicId)
-		.getResultList();
+		List resultList =
+			em.createNativeQuery("SELECT max(sequence) FROM skills_matrix_topic_line_item_map where skills_matrix_topic_id=:topicId")
+				.setParameter("topicId", topicId)
+				.getResultList();
 		
 		Long currentMaxSequenceNum = 0L;
 		
@@ -171,17 +185,12 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	}
 	
 	@Override
-	public SkillsMatrixLineItem updateLineItem(Long lineItemId, String lineItemName, String l0desc, String l1desc, String l2desc, String l3desc) {
+	public SkillsMatrixLineItem updateLineItem(Long lineItemId, String lineItemName) {
 		Optional<SkillsMatrixLineItem> opt = skillsMatrixLineItemRepository.findById(lineItemId);
 		SkillsMatrixLineItem rtn = null;
 		
 		if (opt.isPresent()) {
 			SkillsMatrixLineItem smli = opt.get();
-			
-			smli.setL0Description(l0desc);
-			smli.setL1Description(l1desc);
-			smli.setL2Description(l2desc);
-			smli.setL3Description(l3desc);
 			
 			smli.setName(lineItemName);
 			
@@ -243,6 +252,13 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		return resultList;
 	}
 
+	private List getSkillSequences(Long skillsMatrixId) {
+		List resultList = em.createNativeQuery("select smt.id as topic_id, smli.id as skills_matrix_line_item_id, smsk.id as skills_matrix_skill_id, smliskm.level, smliskm.sequence FROM skills_matrix sm, skills_matrix_topic smt, skills_matrix_topic_map smtm, skills_matrix_line_item smli, skills_matrix_topic_line_item_map smtlim, skills_matrix_skill smsk, skills_matrix_line_item_skill_map smliskm WHERE sm.id=:skillsMatrixId and smtm.skills_matrix_id=sm.id and smtm.skills_matrix_topic_id=smt.id and smt.id=smtlim.skills_matrix_topic_id and smtlim.skills_matrix_line_item_id=smli.id and smli.id=smliskm.skills_matrix_line_item_id and smliskm.skills_matrix_skill_id=smsk.id;")
+				.setParameter("skillsMatrixId", skillsMatrixId).getResultList();
+
+		return resultList;
+	}
+
 	private SkillsMatrixTopic setSequenceOnTopic(SkillsMatrixTopic topic, List topicSequences) {
 		int x = 0;
 		SkillsMatrixTopic rtn = null;
@@ -250,7 +266,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		while (rtn == null && x < topicSequences.size()) {
 			Object[] ts = (Object[])topicSequences.get(x++);
 			
-			if (((BigInteger)ts[0]).longValue() == (Long)topic.getId()) {
+			if (((BigInteger)ts[0]).longValue() == topic.getId()) {
 				topic.setSequence(((BigInteger)ts[1]).longValue());
 				rtn = topic;
 			}
@@ -266,9 +282,28 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		while (rtn == null && x < lineItemSequences.size()) {
 			Object[] lis = (Object[])lineItemSequences.get(x++);
 
-			if (((BigInteger)lis[0]).longValue() == topicId && ((BigInteger)lis[1]).longValue() == (Long) smli.getId()) {
+			if (((BigInteger)lis[0]).longValue() == topicId && ((BigInteger)lis[1]).longValue() == smli.getId()) {
 				 smli.setSequence(((BigInteger)lis[2]).longValue());
 				rtn =  smli;
+			}
+		}
+
+		return rtn;
+	}
+
+	private SkillsMatrixSkill setSequenceAndLevelOnSkill(Long topicId, Long lineItemId, SkillsMatrixSkill smsk, List skillsSequences) {
+		int x = 0;
+		SkillsMatrixSkill rtn = null;
+
+		while (rtn == null && x < skillsSequences.size()) {
+			Object[] sks = (Object[])skillsSequences.get(x++);
+
+			if (((BigInteger)sks[0]).longValue() == topicId
+					&& ((BigInteger)sks[1]).longValue() == lineItemId
+					&& ((BigInteger)sks[2]).longValue() == smsk.getId()) {
+				smsk.setLevel(((BigInteger)sks[3]).longValue());
+				smsk.setSequence(((BigInteger)sks[4]).longValue());
+				rtn = smsk;
 			}
 		}
 
