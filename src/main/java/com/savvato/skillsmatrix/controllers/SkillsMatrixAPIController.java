@@ -171,4 +171,9 @@ public class SkillsMatrixAPIController {
         return this.skillsMatrixService.addSkill(req.lineItemId, req.skillLevel, req.skillDescription);
     }
 
+    @RequestMapping(value = { "/api/v1/skills-matrix/skill/delete" }, method=RequestMethod.DELETE)
+    public void deleteSkill(@RequestBody @Valid SkillRequest req) {
+        this.skillsMatrixService.deleteSkill(req.lineItemId, req.skillId);
+    }
+
 }

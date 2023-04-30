@@ -21,5 +21,7 @@ public interface SkillsMatrixService {
 
 	public SkillsMatrixSkill addSkill(Long lineItemId, Long level, String skillDescription);
 
+	public void deleteSkill(Long lineItemId, Long skillId);
+
 	public boolean updateSequencesRelatedToATopicAndItsLineItems(long[] arr);
 }

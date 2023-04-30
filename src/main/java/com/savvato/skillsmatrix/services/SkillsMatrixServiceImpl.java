@@ -198,6 +198,26 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 		return rtn;
 	}
+
+	@Override
+	@Transactional
+	public void deleteSkill(Long lineItemId, Long skillId) {
+		em.createNativeQuery("DELETE FROM skills_matrix_line_item_skill_map m WHERE m.skills_matrix_line_item_id=:lineItemId AND m.skills_matrix_skill_id=:skillId")
+				.setParameter("lineItemId", lineItemId)
+				.setParameter("skillId", skillId)
+				.executeUpdate();
+
+		List resultList = em.createNativeQuery("SELECT count(*) FROM skills_matrix_line_item_skill_map m WHERE m.skills_matrix_skill_id=:skillId")
+				.setParameter("skillId", skillId)
+				.getResultList();
+
+		if (resultList.size() > 0 && resultList.get(0) != null) {
+			Long count = Long.parseLong(resultList.get(0).toString());
+
+			if (count == 0)
+				skillsMatrixSkillRepository.deleteById(skillId);
+		}
+	}
 	
 	@Override
 	public Optional<SkillsMatrixLineItem> getLineItem(Long lineItemId) {
