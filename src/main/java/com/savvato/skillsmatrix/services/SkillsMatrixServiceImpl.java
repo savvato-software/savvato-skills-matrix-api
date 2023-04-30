@@ -218,6 +218,15 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 				skillsMatrixSkillRepository.deleteById(skillId);
 		}
 	}
+
+	@Override
+	public SkillsMatrixSkill updateSkill(Long skillId, String desc) {
+		SkillsMatrixSkill skill = new SkillsMatrixSkill();
+		skill.setId(skillId);
+		skill.setDescription(desc);
+
+		return skillsMatrixSkillRepository.save(skill);
+	}
 	
 	@Override
 	public Optional<SkillsMatrixLineItem> getLineItem(Long lineItemId) {
