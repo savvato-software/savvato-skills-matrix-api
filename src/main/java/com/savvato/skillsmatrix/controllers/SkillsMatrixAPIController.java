@@ -1,9 +1,11 @@
 package com.savvato.skillsmatrix.controllers;
 
 import com.savvato.skillsmatrix.constants.Constants;
+import com.savvato.skillsmatrix.controllers.dto.SkillRequest;
 import com.savvato.skillsmatrix.dto.SkillsMatrixSummaryDTO;
 import com.savvato.skillsmatrix.entities.SkillsMatrix;
 import com.savvato.skillsmatrix.entities.SkillsMatrixLineItem;
+import com.savvato.skillsmatrix.entities.SkillsMatrixSkill;
 import com.savvato.skillsmatrix.entities.SkillsMatrixTopic;
 import com.savvato.skillsmatrix.services.SkillsMatrixService;
 import net.minidev.json.JSONArray;
@@ -12,12 +14,10 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -165,4 +165,10 @@ public class SkillsMatrixAPIController {
 
         return true;
     }
+
+    @RequestMapping(value = { "/api/v1/skills-matrix/skill/new" }, method=RequestMethod.POST)
+    public SkillsMatrixSkill newSkill(@RequestBody @Valid SkillRequest req) {
+        return this.skillsMatrixService.addSkill(req.lineItemId, req.skillLevel, req.skillDescription);
+    }
+
 }

@@ -46,6 +46,17 @@ public class SkillsMatrixSkill {
     	this.sequence = seq;
     }
 
+	@Transient
+	private Long lineItemId;
+
+	public Long getLineItemId() {
+		return lineItemId;
+	}
+
+	public void setLineItemId(Long lineItemId) {
+		this.lineItemId = lineItemId;
+	}
+
     public SkillsMatrixSkill(String name) {
 		this.description = name;
 	}

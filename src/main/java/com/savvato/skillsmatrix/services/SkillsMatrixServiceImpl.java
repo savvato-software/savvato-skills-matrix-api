@@ -6,6 +6,7 @@ import com.savvato.skillsmatrix.entities.SkillsMatrixSkill;
 import com.savvato.skillsmatrix.entities.SkillsMatrixTopic;
 import com.savvato.skillsmatrix.repositories.SkillsMatrixLineItemRepository;
 import com.savvato.skillsmatrix.repositories.SkillsMatrixRepository;
+import com.savvato.skillsmatrix.repositories.SkillsMatrixSkillRepository;
 import com.savvato.skillsmatrix.repositories.SkillsMatrixTopicRepository;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,10 +32,12 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	
 	@Autowired
 	SkillsMatrixTopicRepository skillsMatrixTopicRepository;
-	
+
 	@Autowired
 	SkillsMatrixLineItemRepository skillsMatrixLineItemRepository;
-	
+	@Autowired
+	SkillsMatrixSkillRepository skillsMatrixSkillRepository;
+
 	@Override
 	public SkillsMatrix get(Long id) {
 		Optional<SkillsMatrix> opt = skillsMatrixRepository.findById(id);
@@ -160,6 +163,38 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 				.setParameter("sequence", currentMaxSequenceNum + 1)
 				.executeUpdate();
 		}
+
+		return rtn;
+	}
+
+	@Override
+	@Transactional
+	public SkillsMatrixSkill addSkill(Long lineItemId, Long level, String skillDescription) {
+		SkillsMatrixSkill rtn = skillsMatrixSkillRepository.save(new SkillsMatrixSkill(skillDescription));
+
+		List resultList =
+			em.createNativeQuery("SELECT max(sequence) FROM skills_matrix_line_item_skill_map where skills_matrix_line_item_id=:lineItemId and level=:level")
+					.setParameter("lineItemId", lineItemId)
+					.setParameter("level", level)
+				.getResultList();
+
+		Long currentMaxSequenceNum = 0L;
+
+		if (resultList.size() > 0 && resultList.get(0) != null)
+			currentMaxSequenceNum = Long.parseLong(resultList.get(0).toString());
+
+		if (lineItemId > 0) {
+			em.createNativeQuery("INSERT INTO skills_matrix_line_item_skill_map (skills_matrix_line_item_id, skills_matrix_skill_id, level, sequence) VALUES (:lineItemId, :skillId, :level, :sequence)")
+					.setParameter("lineItemId", lineItemId)
+					.setParameter("skillId", rtn.getId())
+					.setParameter("level", level)
+					.setParameter("sequence", currentMaxSequenceNum + 1)
+					.executeUpdate();
+		}
+
+		rtn.setLevel(level);
+		rtn.setSequence(currentMaxSequenceNum + 1);
+		rtn.setLineItemId(lineItemId);
 
 		return rtn;
 	}
