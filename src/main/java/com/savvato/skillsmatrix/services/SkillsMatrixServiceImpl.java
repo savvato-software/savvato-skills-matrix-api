@@ -280,7 +280,32 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		
 		return true;
 	}
-	
+
+	@Override
+	@Transactional
+	public boolean updateSequencesRelatedToALineItemAndItsSkills(long[] arr) {
+		long lineItemId = arr[2];
+		int pos = 3;
+
+		while (pos < arr.length) {
+			long skillId = arr[pos++];
+			long sequence = arr[pos++];
+
+			setSkillSequence(lineItemId, skillId, sequence);
+		}
+
+		return true;
+	}
+
+
+	private void setSkillSequence(Long lineItemId, Long skillId, Long sequence) {
+		em.createNativeQuery("UPDATE skills_matrix_line_item_skill_map smliskm SET smliskm.sequence=:sequence WHERE smliskm.skills_matrix_line_item_id=:lineItemId AND smliskm.skills_matrix_skill_id=:skillId")
+				.setParameter("lineItemId", lineItemId)
+				.setParameter("skillId", skillId)
+				.setParameter("sequence", sequence)
+				.executeUpdate();
+	}
+
 	private void setTopicSequence(Long topicId, Long sequence) {
 		em.createNativeQuery("UPDATE skills_matrix_topic_map smtm SET smtm.sequence = :sequence WHERE smtm.skills_matrix_topic_id = :topicId")
 			.setParameter("topicId", topicId)

@@ -124,6 +124,42 @@ public class SkillsMatrixAPIController {
         return rtn;
     }
 
+    @RequestMapping(value = { "/api/v1/skills-matrix/sequences/skills"}, method=RequestMethod.PUT)
+    public boolean updateSkillSequences(HttpServletRequest request) {
+        try {
+            String str = request.getReader().lines().collect(Collectors.joining());
+
+            net.minidev.json.parser.JSONParser parser = new JSONParser();
+
+            JSONObject obj = (JSONObject)parser.parse(str);
+            JSONArray arr = (JSONArray)obj.get("arr");
+
+            long numOfTopics = arr.size();
+
+            for (long x=0; x < numOfTopics; x++) {
+                JSONArray topicArr = (JSONArray)arr.get((int)x);
+                long numOfLineItems = topicArr.size();
+
+                for (long y=0; y < numOfLineItems; y++) {
+                    JSONArray liArr = (JSONArray)topicArr.get((int)y);
+
+                        long[] larr = new long[liArr.size()];
+
+                        for(int z=0; z < liArr.size(); z++) {
+                            larr[z] = Long.parseLong(liArr.get(z)+"");
+                        }
+
+                        skillsMatrixService.updateSequencesRelatedToALineItemAndItsSkills(larr);
+                    }
+                }
+        } catch (IOException | ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
     @RequestMapping(value = { "/api/v1/skills-matrix/sequences" }, method=RequestMethod.POST)
     public boolean updateLineItemSequences(HttpServletRequest request) {
         try {

@@ -26,4 +26,6 @@ public interface SkillsMatrixService {
 	public SkillsMatrixSkill updateSkill(Long skillId, String desc);
 
 	public boolean updateSequencesRelatedToATopicAndItsLineItems(long[] arr);
+
+	public boolean updateSequencesRelatedToALineItemAndItsSkills(long[] arr);
 }
