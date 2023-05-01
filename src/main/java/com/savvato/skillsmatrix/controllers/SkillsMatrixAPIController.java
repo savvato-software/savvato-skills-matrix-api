@@ -2,6 +2,7 @@ package com.savvato.skillsmatrix.controllers;
 
 import com.savvato.skillsmatrix.constants.Constants;
 import com.savvato.skillsmatrix.controllers.dto.SkillRequest;
+import com.savvato.skillsmatrix.controllers.dto.SkillsMatrixRequest;
 import com.savvato.skillsmatrix.dto.SkillsMatrixSummaryDTO;
 import com.savvato.skillsmatrix.entities.SkillsMatrix;
 import com.savvato.skillsmatrix.entities.SkillsMatrixLineItem;
@@ -13,8 +14,10 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import retrofit2.http.Path;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -35,14 +38,24 @@ public class SkillsMatrixAPIController {
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix"}, method = RequestMethod.GET)
-    public ResponseEntity<List<SkillsMatrixSummaryDTO>> getAll() {
-
-        return null;
+    public ResponseEntity<Iterable<SkillsMatrix>> getAll() {
+        return ResponseEntity.status(HttpStatus.OK).body(skillsMatrixService.getAll());
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/{id}" }, method=RequestMethod.GET)
     public SkillsMatrix get(@PathVariable Long id) {
         return skillsMatrixService.get(id);
+    }
+
+    @RequestMapping(value = { "/api/v1/skills-matrix/new" }, method=RequestMethod.POST)
+    public SkillsMatrix newSkillsMatrix(@RequestBody @Valid SkillsMatrixRequest req) {
+        return skillsMatrixService.addSkillsMatrix(req.name);
+    }
+
+    @RequestMapping(value = {"/api/v1/skills-matrix/{skillsMatrixId}" }, method=RequestMethod.POST)
+    public SkillsMatrix updateSkillsMatrix(HttpServletRequest request, @PathVariable Long skillsMatrixId){
+
+        return null;
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/topics/new" }, method=RequestMethod.POST)

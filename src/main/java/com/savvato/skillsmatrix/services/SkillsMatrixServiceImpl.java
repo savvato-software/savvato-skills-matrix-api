@@ -38,6 +38,10 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	@Autowired
 	SkillsMatrixSkillRepository skillsMatrixSkillRepository;
 
+	public Iterable<SkillsMatrix> getAll() {
+		return skillsMatrixRepository.findAll();
+	}
+
 	@Override
 	public SkillsMatrix get(Long id) {
 		Optional<SkillsMatrix> opt = skillsMatrixRepository.findById(id);
@@ -117,6 +121,31 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 			}
 		}
 		
+		return sm;
+	}
+
+	@Override
+	public SkillsMatrix addSkillsMatrix(String name) {
+		SkillsMatrix sm = new SkillsMatrix();
+
+		sm.setName(name);
+
+		return skillsMatrixRepository.save(sm);
+	}
+
+	@Override
+	public SkillsMatrix updateSkillsMatrix(Long id, String name) {
+		Optional<SkillsMatrix> opt = skillsMatrixRepository.findById(id);
+		SkillsMatrix sm = null;
+
+		if (opt.isPresent()) {
+			sm = opt.get();
+
+			sm.setName(name);
+
+			skillsMatrixRepository.save(sm);
+		}
+
 		return sm;
 	}
 	

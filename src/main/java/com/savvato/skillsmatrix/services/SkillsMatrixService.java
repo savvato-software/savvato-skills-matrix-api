@@ -10,7 +10,11 @@ import java.util.Optional;
 
 public interface SkillsMatrixService {
 
+	public Iterable<SkillsMatrix> getAll();
 	public SkillsMatrix get(Long id);
+
+	SkillsMatrix addSkillsMatrix(String name);
+	SkillsMatrix updateSkillsMatrix(Long skillsMatrixId, String name);
 
 	public SkillsMatrixTopic addTopic(String topicName);
 	public SkillsMatrixTopic updateTopic(Long topicId, String name);
