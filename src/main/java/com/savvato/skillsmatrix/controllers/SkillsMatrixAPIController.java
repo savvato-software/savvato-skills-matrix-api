@@ -217,4 +217,8 @@ public class SkillsMatrixAPIController {
         this.skillsMatrixService.updateSkill(req.skillId, req.skillDescription);
     }
 
+    @RequestMapping(value = { "/api/v1/skills-matrix/skill/update-level" }, method=RequestMethod.PUT)
+    public void updateSkillLevel(@RequestBody @Valid SkillRequest req) {
+        this.skillsMatrixService.updateSkillLevel(req.lineItemId, req.skillId, req.skillLevel);
+    }
 }

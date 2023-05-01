@@ -28,4 +28,6 @@ public interface SkillsMatrixService {
 	public boolean updateSequencesRelatedToATopicAndItsLineItems(long[] arr);
 
 	public boolean updateSequencesRelatedToALineItemAndItsSkills(long[] arr);
+
+	public boolean updateSkillLevel(long lineItemId, long skillId, long level);
 }

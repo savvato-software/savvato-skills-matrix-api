@@ -172,16 +172,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	public SkillsMatrixSkill addSkill(Long lineItemId, Long level, String skillDescription) {
 		SkillsMatrixSkill rtn = skillsMatrixSkillRepository.save(new SkillsMatrixSkill(skillDescription));
 
-		List resultList =
-			em.createNativeQuery("SELECT max(sequence) FROM skills_matrix_line_item_skill_map where skills_matrix_line_item_id=:lineItemId and level=:level")
-					.setParameter("lineItemId", lineItemId)
-					.setParameter("level", level)
-				.getResultList();
-
-		Long currentMaxSequenceNum = 0L;
-
-		if (resultList.size() > 0 && resultList.get(0) != null)
-			currentMaxSequenceNum = Long.parseLong(resultList.get(0).toString());
+		Long currentMaxSequenceNum = getMaxSequence(lineItemId, level);
 
 		if (lineItemId > 0) {
 			em.createNativeQuery("INSERT INTO skills_matrix_line_item_skill_map (skills_matrix_line_item_id, skills_matrix_skill_id, level, sequence) VALUES (:lineItemId, :skillId, :level, :sequence)")
@@ -297,6 +288,93 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		return true;
 	}
 
+	private long getMaxSequence(long lineItemId, long level) {
+		List resultList =
+				em.createNativeQuery("SELECT max(sequence) FROM skills_matrix_line_item_skill_map where skills_matrix_line_item_id=:lineItemId and level=:level")
+						.setParameter("lineItemId", lineItemId)
+						.setParameter("level", level)
+						.getResultList();
+
+		long rtn = -1;
+		if (resultList.size() > 0 && resultList.get(0) != null)
+			rtn = Long.parseLong(resultList.get(0).toString());
+
+		return rtn;
+	}
+
+	private long getSkillLevel(long skillId) {
+		long rtn = -1;
+		List skillSequences = getSkillSequences(1L);
+
+		boolean found = false;
+		int i = 0;
+		while (!found) {
+			Object[] row = (Object[]) skillSequences.get(i++);
+
+			if (Long.parseLong(row[2]+"") == skillId) {
+				found = true;
+				rtn = Long.parseLong(row[3]+"");
+			}
+		}
+
+		return rtn;
+	}
+
+
+
+	@Override
+	@Transactional
+	public boolean updateSkillLevel(long lineItemId, long skillId, long destinationLevel) {
+		// 	get the max sequence of the destination level
+		long maxSequence = getMaxSequence(lineItemId, destinationLevel);
+
+		//  get the level the skill is currently at
+		long originalSkillLevel = getSkillLevel(skillId);
+
+		//  get the max sequence for the original level
+		long origLevelMaxSequence = getMaxSequence(lineItemId, originalSkillLevel);
+
+		//  insert a row for the lineItem, skill, destinationLevel and new sequence
+		em.createNativeQuery("INSERT INTO skills_matrix_line_item_skill_map (skills_matrix_line_item_id, skills_matrix_skill_id, level, sequence) VALUES (:lineItemId, :skillId, :level, :sequence)")
+				.setParameter("lineItemId", lineItemId)
+				.setParameter("skillId", skillId)
+				.setParameter("level", destinationLevel)
+				.setParameter("sequence", maxSequence + 1)
+				.executeUpdate();
+
+		// get skills_matrix_line_item_skill_map for orginal level
+		List<Long[]> arr = getSkillLineItemMapInfoPerLevel(lineItemId, originalSkillLevel);
+
+		// find the index of the row we're moving
+		int index = 0;
+		boolean found = false;
+		Object[] row = null;
+
+		while (!found) {
+			row = arr.get(index++);
+			found = Long.parseLong(row[1]+"") == skillId;
+		}
+
+		// while there is a next row
+		while (index < arr.size()) {
+			row = arr.get(index++);
+			// set the sequence to its value -1
+			em.createNativeQuery("UPDATE skills_matrix_line_item_skill_map smliskm SET smliskm.sequence=:sequence WHERE smliskm.skills_matrix_line_item_id=:lineItemId AND smliskm.skills_matrix_skill_id=:skillId")
+					.setParameter("lineItemId", lineItemId)
+					.setParameter("skillId", row[1])
+					.setParameter("sequence", Long.parseLong(row[3]+"") - 1)
+					.executeUpdate();
+		}
+
+		em.createNativeQuery("DELETE FROM skills_matrix_line_item_skill_map smliskm WHERE smliskm.skills_matrix_line_item_id=:lineItemId AND smliskm.skills_matrix_skill_id=:skillId AND smliskm.level=:level AND smliskm.sequence=:sequence")
+				.setParameter("lineItemId", lineItemId)
+				.setParameter("skillId", skillId)
+				.setParameter("level", originalSkillLevel)
+				.setParameter("sequence", origLevelMaxSequence)
+				.executeUpdate();
+
+		return true;
+	}
 
 	private void setSkillSequence(Long lineItemId, Long skillId, Long sequence) {
 		em.createNativeQuery("UPDATE skills_matrix_line_item_skill_map smliskm SET smliskm.sequence=:sequence WHERE smliskm.skills_matrix_line_item_id=:lineItemId AND smliskm.skills_matrix_skill_id=:skillId")
@@ -342,11 +420,22 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	}
 
 	private List getSkillSequences(Long skillsMatrixId) {
-		List resultList = em.createNativeQuery("select smt.id as topic_id, smli.id as skills_matrix_line_item_id, smsk.id as skills_matrix_skill_id, smliskm.level, smliskm.sequence FROM skills_matrix sm, skills_matrix_topic smt, skills_matrix_topic_map smtm, skills_matrix_line_item smli, skills_matrix_topic_line_item_map smtlim, skills_matrix_skill smsk, skills_matrix_line_item_skill_map smliskm WHERE sm.id=:skillsMatrixId and smtm.skills_matrix_id=sm.id and smtm.skills_matrix_topic_id=smt.id and smt.id=smtlim.skills_matrix_topic_id and smtlim.skills_matrix_line_item_id=smli.id and smli.id=smliskm.skills_matrix_line_item_id and smliskm.skills_matrix_skill_id=smsk.id;")
+		List resultList = em.createNativeQuery("select smt.id as topic_id, smli.id as skills_matrix_line_item_id, smsk.id as skills_matrix_skill_id, smliskm.level, smliskm.sequence FROM skills_matrix sm, skills_matrix_topic smt, skills_matrix_topic_map smtm, skills_matrix_line_item smli, skills_matrix_topic_line_item_map smtlim, skills_matrix_skill smsk, skills_matrix_line_item_skill_map smliskm WHERE sm.id=:skillsMatrixId and smtm.skills_matrix_id=sm.id and smtm.skills_matrix_topic_id=smt.id and smt.id=smtlim.skills_matrix_topic_id and smtlim.skills_matrix_line_item_id=smli.id and smli.id=smliskm.skills_matrix_line_item_id and smliskm.skills_matrix_skill_id=smsk.id ORDER BY topic_id, skills_matrix_line_item_id, level, sequence;")
 				.setParameter("skillsMatrixId", skillsMatrixId).getResultList();
 
 		return resultList;
 	}
+
+	private List getSkillLineItemMapInfoPerLevel(Long lineItemId, Long level) {
+		List resultList = em.createNativeQuery("select * from skills_matrix_line_item_skill_map m where m.skills_matrix_line_item_id=:lineItemId AND m.level=:level ORDER BY skills_matrix_line_item_id, level, sequence;")
+				.setParameter("lineItemId", lineItemId)
+				.setParameter("level", level)
+				.getResultList();
+
+		return resultList;
+	}
+
+
 
 	private SkillsMatrixTopic setSequenceOnTopic(SkillsMatrixTopic topic, List topicSequences) {
 		int x = 0;
@@ -398,4 +487,6 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 		return rtn;
 	}
+
+
 }
