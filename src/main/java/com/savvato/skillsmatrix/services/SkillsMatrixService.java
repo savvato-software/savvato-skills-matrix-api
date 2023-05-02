@@ -16,7 +16,7 @@ public interface SkillsMatrixService {
 	SkillsMatrix addSkillsMatrix(String name);
 	SkillsMatrix updateSkillsMatrix(Long skillsMatrixId, String name);
 
-	public SkillsMatrixTopic addTopic(String topicName);
+	public SkillsMatrixTopic addTopic(Long skillsMatrixId, String topicName);
 	public SkillsMatrixTopic updateTopic(Long topicId, String name);
 
 	public SkillsMatrixLineItem addLineItem(Long topicId, String lineItemName);

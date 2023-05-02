@@ -1,8 +1,10 @@
 package com.savvato.skillsmatrix.controllers;
 
 import com.savvato.skillsmatrix.constants.Constants;
+import com.savvato.skillsmatrix.controllers.dto.LineItemRequest;
 import com.savvato.skillsmatrix.controllers.dto.SkillRequest;
 import com.savvato.skillsmatrix.controllers.dto.SkillsMatrixRequest;
+import com.savvato.skillsmatrix.controllers.dto.TopicRequest;
 import com.savvato.skillsmatrix.dto.SkillsMatrixSummaryDTO;
 import com.savvato.skillsmatrix.entities.SkillsMatrix;
 import com.savvato.skillsmatrix.entities.SkillsMatrixLineItem;
@@ -59,10 +61,8 @@ public class SkillsMatrixAPIController {
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/topics/new" }, method=RequestMethod.POST)
-    public SkillsMatrixTopic newTopic(HttpServletRequest request) {
-        String name = request.getParameter("topicName");
-
-        return skillsMatrixService.addTopic(name);
+    public SkillsMatrixTopic newTopic(@RequestBody @Valid TopicRequest req) {
+        return skillsMatrixService.addTopic(req.skillsMatrixId, req.topicName);
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/topic/{topicId}" }, method=RequestMethod.POST)
@@ -90,19 +90,8 @@ public class SkillsMatrixAPIController {
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/topics/{id}/lineitem/new" }, method=RequestMethod.POST)
-    public SkillsMatrixLineItem newLineItem(HttpServletRequest request, @PathVariable Long id) {
-        String name = request.getParameter("lineItemName");
-        String l0desc = request.getParameter(Constants.L0DESCRIPTION);
-        String l1desc = request.getParameter(Constants.L1DESCRIPTION);
-        String l2desc = request.getParameter(Constants.L2DESCRIPTION);
-        String l3desc = request.getParameter(Constants.L3DESCRIPTION);
-
-        if (l0desc == null) l0desc = "Level 1 skill.";
-        if (l1desc == null) l1desc = "Level 2 skill.";
-        if (l2desc == null) l2desc = "Level 3 skill.";
-        if (l3desc == null) l3desc = "Level 4 skill.";
-
-        return skillsMatrixService.addLineItem(id, name);
+    public SkillsMatrixLineItem newLineItem(@RequestBody @Valid LineItemRequest req) {
+        return skillsMatrixService.addLineItem(req.topicId, req.lineItemName);
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/lineitem/{lineItemId}" }, method=RequestMethod.GET)
