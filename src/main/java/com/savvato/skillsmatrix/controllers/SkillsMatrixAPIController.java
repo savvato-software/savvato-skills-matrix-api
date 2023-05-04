@@ -110,23 +110,10 @@ public class SkillsMatrixAPIController {
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/lineitem/{lineItemId}" }, method=RequestMethod.POST)
-    public SkillsMatrixLineItem updateLineItem(HttpServletRequest request, @PathVariable Long lineItemId) {
+    public SkillsMatrixLineItem updateLineItem(@RequestBody @Valid LineItemRequest req) {
         SkillsMatrixLineItem rtn = null;
 
-        try {
-            String str = request.getReader().lines().collect(Collectors.joining());
-            net.minidev.json.parser.JSONParser parser = new JSONParser();
-
-            JSONObject obj = (JSONObject)((JSONObject)parser.parse(str)).get("lineItem");
-
-            rtn = skillsMatrixService.updateLineItem(
-                    Long.parseLong(obj.getAsString("id")),
-                    obj.getAsString("name"));
-
-        } catch (IOException | ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        rtn = skillsMatrixService.updateLineItem(req.lineItemId, req.lineItemName);
 
         return rtn;
     }
@@ -226,6 +213,6 @@ public class SkillsMatrixAPIController {
 
     @RequestMapping(value = { "/api/v1/skills-matrix/skill/update-level" }, method=RequestMethod.PUT)
     public void updateSkillLevel(@RequestBody @Valid SkillRequest req) {
-        this.skillsMatrixService.updateSkillLevel(req.lineItemId, req.skillId, req.skillLevel);
+        this.skillsMatrixService.updateSkillLevel(req.skillsMatrixId, req.lineItemId, req.skillId, req.skillLevel);
     }
 }

@@ -43,13 +43,13 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	}
 
 	@Override
-	public SkillsMatrix get(Long id) {
-		Optional<SkillsMatrix> opt = skillsMatrixRepository.findById(id);
+	public SkillsMatrix get(Long skillsMatrixId) {
+		Optional<SkillsMatrix> opt = skillsMatrixRepository.findById(skillsMatrixId);
 		
-		List topicSequences = getTopicSequences(id);
-		List lineItemSequences = getLineItemSequences(id);
-		List skillSequences = getSkillSequences(id);
-		
+		List topicSequences = getTopicSequences(skillsMatrixId);
+		List lineItemSequences = getLineItemSequences(skillsMatrixId);
+		List skillSequences = getSkillSequences(skillsMatrixId);
+
 		SkillsMatrix sm = null;
 		
 		ArrayList<Long> idsArr = new ArrayList<>();
@@ -333,9 +333,9 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		return rtn;
 	}
 
-	private long getSkillLevel(long skillId) {
+	private long getSkillLevel(long skillsMatrixId, long skillId) {
 		long rtn = -1;
-		List skillSequences = getSkillSequences(1L);
+		List skillSequences = getSkillSequences(skillsMatrixId);
 
 		boolean found = false;
 		int i = 0;
@@ -355,12 +355,12 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 	@Override
 	@Transactional
-	public boolean updateSkillLevel(long lineItemId, long skillId, long destinationLevel) {
+	public boolean updateSkillLevel(long skillsMatrixId, long lineItemId, long skillId, long destinationLevel) {
 		// 	get the max sequence of the destination level
 		long maxSequence = getMaxSequence(lineItemId, destinationLevel);
 
 		//  get the level the skill is currently at
-		long originalSkillLevel = getSkillLevel(skillId);
+		long originalSkillLevel = getSkillLevel(skillsMatrixId, skillId);
 
 		//  get the max sequence for the original level
 		long origLevelMaxSequence = getMaxSequence(lineItemId, originalSkillLevel);

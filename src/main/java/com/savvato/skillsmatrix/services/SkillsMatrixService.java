@@ -33,5 +33,5 @@ public interface SkillsMatrixService {
 
 	public boolean updateSequencesRelatedToALineItemAndItsSkills(long[] arr);
 
-	public boolean updateSkillLevel(long lineItemId, long skillId, long level);
+	public boolean updateSkillLevel(long skillsMatrixId, long lineItemId, long skillId, long level);
 }
