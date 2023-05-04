@@ -43,6 +43,11 @@ public class SkillsMatrixAPIController {
     public ResponseEntity<Iterable<SkillsMatrix>> getAll() {
         return ResponseEntity.status(HttpStatus.OK).body(skillsMatrixService.getAll());
     }
+    @RequestMapping(value = { "/api/v1/skills-matrix"}, method = RequestMethod.PUT)
+    public ResponseEntity<Iterable<SkillsMatrix>> updateSkillsMatrixName(@RequestBody @Valid SkillsMatrixRequest req) {
+        skillsMatrixService.updateSkillsMatrix(req.skillsMatrixId, req.name);
+        return ResponseEntity.status(HttpStatus.OK).body(skillsMatrixService.getAll());
+    }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/{id}" }, method=RequestMethod.GET)
     public SkillsMatrix get(@PathVariable Long id) {
