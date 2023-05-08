@@ -216,7 +216,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 		rtn.setLevel(level);
 		rtn.setSequence(currentMaxSequenceNum + 1);
-		rtn.setLineItemId(lineItemId);
+		rtn.setDetailLineItemId(lineItemId);
 
 		return rtn;
 	}
@@ -242,12 +242,20 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	}
 
 	@Override
-	public SkillsMatrixSkill updateSkill(Long skillId, String desc) {
-		SkillsMatrixSkill skill = new SkillsMatrixSkill();
-		skill.setId(skillId);
-		skill.setDescription(desc);
+	public SkillsMatrixSkill updateSkill(Long skillId, String desc, Long detailLineItemId) {
+		Optional<SkillsMatrixSkill> opt = skillsMatrixSkillRepository.findById(skillId);
+		SkillsMatrixSkill rtn = null;
 
-		return skillsMatrixSkillRepository.save(skill);
+		if (opt.isPresent()) {
+			SkillsMatrixSkill skill = opt.get();
+
+			skill.setDescription(desc);
+			skill.setDetailLineItemId(detailLineItemId <= 0 ? null : detailLineItemId);
+
+			rtn = skillsMatrixSkillRepository.save(skill);
+		}
+
+		return rtn;
 	}
 	
 	@Override

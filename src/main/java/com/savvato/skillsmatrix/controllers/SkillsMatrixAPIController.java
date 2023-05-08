@@ -208,7 +208,7 @@ public class SkillsMatrixAPIController {
 
     @RequestMapping(value = { "/api/v1/skills-matrix/skill" }, method=RequestMethod.PUT)
     public void updateSkill(@RequestBody @Valid SkillRequest req) {
-        this.skillsMatrixService.updateSkill(req.skillId, req.skillDescription);
+        this.skillsMatrixService.updateSkill(req.skillId, req.skillDescription, req.detailLineItemId);
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/skill/update-level" }, method=RequestMethod.PUT)

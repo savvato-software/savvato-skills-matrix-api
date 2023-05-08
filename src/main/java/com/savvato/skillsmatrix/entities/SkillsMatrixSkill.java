@@ -46,15 +46,14 @@ public class SkillsMatrixSkill {
     	this.sequence = seq;
     }
 
-	@Transient
-	private Long lineItemId;
+	private Long detailLineItemId;
 
-	public Long getLineItemId() {
-		return lineItemId;
+	public Long getDetailLineItemId() {
+		return detailLineItemId;
 	}
 
-	public void setLineItemId(Long lineItemId) {
-		this.lineItemId = lineItemId;
+	public void setDetailLineItemId(Long detailLineItemId) {
+		this.detailLineItemId = detailLineItemId;
 	}
 
     public SkillsMatrixSkill(String name) {

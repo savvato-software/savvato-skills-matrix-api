@@ -6,4 +6,5 @@ public class SkillRequest {
     public String skillDescription;
     public Long skillId;
     public Long skillLevel;
+    public Long detailLineItemId;
 }
