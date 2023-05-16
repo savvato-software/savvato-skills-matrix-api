@@ -3,7 +3,7 @@ package com.savvato.skillsmatrix.entities;
 import javax.persistence.*;
 
 @Entity
-public class SkillsMatrixSkill {
+public class SkillsMatrixSkill extends PermIdEntity{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,6 +19,10 @@ public class SkillsMatrixSkill {
 
 	///
 	private String description;
+
+	public String getName() { // to comply with PermIdEntity
+		return description;
+	}
 
 	public String getDescription() {
 		return description;

@@ -8,6 +8,8 @@ import com.savvato.skillsmatrix.repositories.SkillsMatrixLineItemRepository;
 import com.savvato.skillsmatrix.repositories.SkillsMatrixRepository;
 import com.savvato.skillsmatrix.repositories.SkillsMatrixSkillRepository;
 import com.savvato.skillsmatrix.repositories.SkillsMatrixTopicRepository;
+import com.savvato.skillsmatrix.utils.PermIdEntityUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,12 +101,12 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 				setSequenceOnTopic(topic, topicSequences);
 				
 				Set<SkillsMatrixLineItem> lineItems = topic.getLineItems();
-				
+
 				Iterator<SkillsMatrixLineItem> smliIterator = lineItems.iterator();
-				
+
 				while (smliIterator.hasNext()) {
 					SkillsMatrixLineItem smli = smliIterator.next();
-					
+
 					setSequenceOnLineItem(topic.getId(), smli, lineItemSequences);
 
 					Set<SkillsMatrixSkill> skills = smli.getSkills();
@@ -130,6 +132,8 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 		sm.setName(name);
 
+		PermIdEntityUtils.setPermId(sm);
+
 		return skillsMatrixRepository.save(sm);
 	}
 
@@ -152,7 +156,10 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	@Override
 	@Transactional
 	public SkillsMatrixTopic addTopic(Long skillsMatrixId, String topicName) {
-		SkillsMatrixTopic rtn = skillsMatrixTopicRepository.save(new SkillsMatrixTopic(topicName));
+		SkillsMatrixTopic st = new SkillsMatrixTopic(topicName);
+		PermIdEntityUtils.setPermId(st);
+
+		SkillsMatrixTopic rtn = skillsMatrixTopicRepository.save(st);
 		
 		List resultList = em.createNativeQuery("SELECT max(sequence) FROM skills_matrix_topic_map where skills_matrix_id=:skillsMatrixId")
 				.setParameter("skillsMatrixId", skillsMatrixId)
@@ -175,7 +182,10 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	@Override
 	@Transactional
 	public SkillsMatrixLineItem addLineItem(Long topicId, String lineItemName) {
-		SkillsMatrixLineItem rtn = skillsMatrixLineItemRepository.save(new SkillsMatrixLineItem(lineItemName));
+		SkillsMatrixLineItem li = new SkillsMatrixLineItem(lineItemName);
+		PermIdEntityUtils.setPermId(li);
+
+		SkillsMatrixLineItem rtn = skillsMatrixLineItemRepository.save(li);
 
 		List resultList =
 			em.createNativeQuery("SELECT max(sequence) FROM skills_matrix_topic_line_item_map where skills_matrix_topic_id=:topicId")
@@ -201,7 +211,10 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	@Override
 	@Transactional
 	public SkillsMatrixSkill addSkill(Long lineItemId, Long level, String skillDescription) {
-		SkillsMatrixSkill rtn = skillsMatrixSkillRepository.save(new SkillsMatrixSkill(skillDescription));
+		SkillsMatrixSkill sms = new SkillsMatrixSkill(skillDescription);
+		PermIdEntityUtils.setPermId(sms);
+
+		SkillsMatrixSkill rtn = skillsMatrixSkillRepository.save(sms);
 
 		Long currentMaxSequenceNum = getMaxSequence(lineItemId, level);
 
