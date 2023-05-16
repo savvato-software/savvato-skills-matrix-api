@@ -250,7 +250,11 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 			SkillsMatrixSkill skill = opt.get();
 
 			skill.setDescription(desc);
-			skill.setDetailLineItemId(detailLineItemId <= 0 ? null : detailLineItemId);
+
+			skill.setDetailLineItemId(null);
+
+			if (detailLineItemId != null && detailLineItemId > 0)
+				skill.setDetailLineItemId(detailLineItemId);
 
 			rtn = skillsMatrixSkillRepository.save(skill);
 		}
