@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet author="haxwell" id="202305160636-1">
+        <addColumn catalogName="skillsmatrix_db"
+                   tableName="skills_matrix">
+            <column name="_sha256"
+                    type="varchar(256)">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+        <addColumn catalogName="skillsmatrix_db"
+                   tableName="skills_matrix_topic">
+            <column name="_sha256"
+                    type="varchar(256)">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+        <addColumn catalogName="skillsmatrix_db"
+                   tableName="skills_matrix_line_item">
+            <column name="_sha256"
+                    type="varchar(256)">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+        <addColumn catalogName="skillsmatrix_db"
+                   tableName="skills_matrix_skill">
+            <column name="_sha256"
+                    type="varchar(256)">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
