@@ -28,7 +28,7 @@ public class SkillsMatrixTopicServiceImpl implements SkillsMatrixTopicService {
 	
 	@Override
 	@Transactional
-	public boolean addExistingLineItemAsChild(Long topicId, Long existingLineItemId) {
+	public boolean addExistingLineItemAsChild(String topicId, String existingLineItemId) {
 		Optional<SkillsMatrixTopic> topic = skillsMatrixTopicRepository.findById(topicId);
 
 		if (topic.isPresent()) {
@@ -62,7 +62,7 @@ public class SkillsMatrixTopicServiceImpl implements SkillsMatrixTopicService {
 	}
 	
 	@Override
-	public boolean removeLineItemAsChild(Long topicId, Long existingLineItemId) { 
+	public boolean removeLineItemAsChild(String topicId, String existingLineItemId) {
 		Optional<SkillsMatrixTopic> topic = skillsMatrixTopicRepository.findById(topicId);
 
 		if (topic.isPresent()) {

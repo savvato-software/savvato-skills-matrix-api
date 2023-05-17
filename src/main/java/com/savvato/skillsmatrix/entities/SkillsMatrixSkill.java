@@ -3,24 +3,23 @@ package com.savvato.skillsmatrix.entities;
 import javax.persistence.*;
 
 @Entity
-public class SkillsMatrixSkill extends PermIdEntity{
+public class SkillsMatrixSkill implements PermIdEntityBehavior {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private String id;
 
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
 	///
 	private String description;
 
-	public String getName() { // to comply with PermIdEntity
+	public String getName() { // to comply with PermIdEntityBehavior
 		return description;
 	}
 
@@ -50,13 +49,13 @@ public class SkillsMatrixSkill extends PermIdEntity{
     	this.sequence = seq;
     }
 
-	private Long detailLineItemId;
+	private String detailLineItemId;
 
-	public Long getDetailLineItemId() {
+	public String getDetailLineItemId() {
 		return detailLineItemId;
 	}
 
-	public void setDetailLineItemId(Long detailLineItemId) {
+	public void setDetailLineItemId(String detailLineItemId) {
 		this.detailLineItemId = detailLineItemId;
 	}
 

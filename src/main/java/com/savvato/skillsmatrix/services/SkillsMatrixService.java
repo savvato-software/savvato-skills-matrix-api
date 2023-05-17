@@ -4,34 +4,37 @@ import com.savvato.skillsmatrix.entities.SkillsMatrix;
 import com.savvato.skillsmatrix.entities.SkillsMatrixLineItem;
 import com.savvato.skillsmatrix.entities.SkillsMatrixSkill;
 import com.savvato.skillsmatrix.entities.SkillsMatrixTopic;
+import net.minidev.json.parser.ParseException;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface SkillsMatrixService {
 
+	SkillsMatrix importSkillsMatrix(String str) throws ParseException;
+
 	public Iterable<SkillsMatrix> getAll();
-	public SkillsMatrix get(Long id);
+	public SkillsMatrix get(String id);
 
 	SkillsMatrix addSkillsMatrix(String name);
-	SkillsMatrix updateSkillsMatrix(Long skillsMatrixId, String name);
+	SkillsMatrix updateSkillsMatrix(String skillsMatrixId, String name);
 
-	public SkillsMatrixTopic addTopic(Long skillsMatrixId, String topicName);
-	public SkillsMatrixTopic updateTopic(Long topicId, String name);
+	public SkillsMatrixTopic addTopic(String skillsMatrixId, String topicName);
+	public SkillsMatrixTopic updateTopic(String topicId, String name);
 
-	public SkillsMatrixLineItem addLineItem(Long topicId, String lineItemName);
-	public Optional<SkillsMatrixLineItem> getLineItem(Long lineItemId);
-	public SkillsMatrixLineItem updateLineItem(Long lineItemId, String lineItemName);
+	public SkillsMatrixLineItem addLineItem(String topicId, String lineItemName);
+	public Optional<SkillsMatrixLineItem> getLineItem(String lineItemId);
+	public SkillsMatrixLineItem updateLineItem(String lineItemId, String lineItemName);
 
-	public SkillsMatrixSkill addSkill(Long lineItemId, Long level, String skillDescription);
+	public SkillsMatrixSkill addSkill(String lineItemId, Long level, String skillDescription);
 
-	public void deleteSkill(Long lineItemId, Long skillId);
+	public void deleteSkill(String lineItemId, String skillId);
 
-	public SkillsMatrixSkill updateSkill(Long skillId, String desc, Long detailLineItemId);
+	public SkillsMatrixSkill updateSkill(String skillId, String desc, String detailLineItemId);
 
-	public boolean updateSequencesRelatedToATopicAndItsLineItems(long[] arr);
+	public boolean updateSequencesRelatedToATopicAndItsLineItems(String[] arr);
 
-	public boolean updateSequencesRelatedToALineItemAndItsSkills(long[] arr);
+	public boolean updateSequencesRelatedToALineItemAndItsSkills(String[] arr);
 
-	public boolean updateSkillLevel(long skillsMatrixId, long lineItemId, long skillId, long level);
+	public boolean updateSkillLevel(String skillsMatrixId, String lineItemId, String skillId, long level);
 }

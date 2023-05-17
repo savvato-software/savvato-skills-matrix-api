@@ -7,8 +7,8 @@
 
     <changeSet author="haxwell" id="202304172306-1">
         <createTable tableName="skills_matrix" catalogName="skillsmatrix_db" >
-            <column name="id" type="BIGINT(20)" autoIncrement="true">
-                <constraints nullable="false" primaryKey="true"/>
+            <column name="id" type="VARCHAR(16)">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(128)">
                 <constraints nullable="false"/>
@@ -16,8 +16,8 @@
         </createTable>
 
         <createTable tableName="skills_matrix_topic" catalogName="skillsmatrix_db" >
-            <column name="id" type="BIGINT(20)" autoIncrement="true">
-                <constraints nullable="false" primaryKey="true"/>
+            <column name="id" type="VARCHAR(16)">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(128)">
                 <constraints nullable="false"/>
@@ -25,10 +25,10 @@
         </createTable>
 
         <createTable tableName="skills_matrix_topic_map" catalogName="skillsmatrix_db" >
-            <column name="skills_matrix_id" type="BIGINT(20)">
+            <column name="skills_matrix_id" type="VARCHAR(16)">
                 <constraints nullable="false" foreignKeyName="skills_matrix_topic_map_fk1" references="skills_matrix(id)"/>
             </column>
-            <column name="skills_matrix_topic_id" type="BIGINT(20)">
+            <column name="skills_matrix_topic_id" type="VARCHAR(16)">
                 <constraints nullable="false" foreignKeyName="skills_matrix_topic_map_fk2" references="skills_matrix_topic(id)"/>
             </column>
             <column name="sequence" type="BIGINT(10)">
@@ -37,31 +37,19 @@
         </createTable>
 
         <createTable tableName="skills_matrix_line_item" catalogName="skillsmatrix_db" >
-            <column name="id" type="BIGINT(20)" autoIncrement="true">
-                <constraints nullable="false" primaryKey="true"/>
+            <column name="id" type="VARCHAR(16)">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(128)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="l0_description" type="VARCHAR(512)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="l1_description" type="VARCHAR(512)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="l2_description" type="VARCHAR(512)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="l3_description" type="VARCHAR(512)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
 
         <createTable tableName="skills_matrix_topic_line_item_map" catalogName="skillsmatrix_db" >
-            <column name="skills_matrix_topic_id" type="BIGINT(20)">
+            <column name="skills_matrix_topic_id" type="VARCHAR(16)">
                 <constraints nullable="false" foreignKeyName="skills_matrix_topic_line_item_map_fk1" references="skills_matrix_topic(id)"/>
             </column>
-            <column name="skills_matrix_line_item_id" type="BIGINT(20)">
+            <column name="skills_matrix_line_item_id" type="VARCHAR(16)">
                 <constraints nullable="false" foreignKeyName="skills_matrix_topic_line_item_map_fk2" references="skills_matrix_line_item(id)"/>
             </column>
             <column name="sequence" type="BIGINT(10)">
@@ -70,125 +58,35 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="haxwell" id="202304172306-2">
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix (id, name)
-            VALUES (1, "DTIM Programmer Competency Tech Profile");
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_topic (id, name)
-            VALUES (1, "Computer Science");
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_line_item (id, name, l0_description, l1_description, l2_description, l3_description)
-            VALUES (1,
-                    "Data Structures",
-                    "Doesn't know the difference between Array and LinkedList",
-                    "Able to explain and use Arrays, LinkedLists, Dictionaries etc in practical programming tasks",
-                    "Knows space and time tradeoffs of the basic data structures, Arrays vs LinkedLists, Able to explain how hashtables can be implemented and can handle collisions, Graphs, priority queues and ways to implement them etc.",
-                    "Knowledge of advanced data structures like B-trees, binomial and fibonacci heaps, AVL/Red Black trees, Splay Trees, Skip Lists, tries etc");
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_line_item (id, name, l0_description, l1_description, l2_description, l3_description)
-            VALUES (2,
-                    "Algorithms",
-                    "Unable to find the average of numbers in an array",
-                    "Able to explain basic sorting, searching and data structure traversal and retrieval algorithms",
-                    "Tree, Graph, simple greedy and divide and conquer algorithms, is able to understand the relevance of the levels of this matrix.",
-                    "Able to recognize and code dynamic programming solutions, good knowledge of graph algorithms, good knowledge of numerical computation algorithms, able to identify NP problems etc.");
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_line_item (id, name, l0_description, l1_description, l2_description, l3_description)
-            VALUES (3,
-                    "Databases",
-                    "Doesn’t know what a compiler, linker or interpreter is",
-                    "Basic understanding of compilers, linker and interpreters. Understands what assembly code is and how things work at the hardware level. Some knowledge of virtual memory and paging.",
-                    "Understands kernel mode vs. user mode, multi-threading, synchronization primitives and how they’re implemented, able to read assembly code. Understands how networks work, understanding of network protocols and socket level programming.",
-                    "Understands the entire programming stack, hardware (CPU + Memory + Cache + Interrupts + microcode), binary code, assembly, static and dynamic linking, compilation, interpretation, JIT compilation, garbage collection, heap, stack, memory addressing");
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_line_item (id, name, l0_description, l1_description, l2_description, l3_description)
-            VALUES (4,
-                    "Coding",
-                    "Could not bang out a bubble sort from scratch.",
-                    "Could implement the basic data structures (Linked List, Set)",
-                    "Solving basic Greedy algorithms, Dynamic programming",
-                    "Groks the Competitive Programmers Handbook");
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_line_item (id, name, l0_description, l1_description, l2_description, l3_description)
-            VALUES (5,
-                    "Whiteboarding",
-                    "Has never completed a real world whiteboarding interview.",
-                    "Starts in the upper left, by default. Uses tables to keep track of variable values over iterations.",
-                    "Code is syntactically correct, could run on an actual machine.",
-                    "");
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_line_item (id, name, l0_description, l1_description, l2_description, l3_description)
-            VALUES (6,
-                    "Design Patterns",
-                    "Cannot explain the concept.",
-                    "Can explain a singleton.",
-                    "Can explain several patterns, including Factory",
-                    "Gang of Four on lock, on to Enterprise Integration Patterns.");
-        </sql>
+    <changeSet author="haxwell" id="202304251059-1">
+        <createTable tableName="skills_matrix_skill" catalogName="skillsmatrix_db" >
+            <column name="id" type="VARCHAR(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="detail_line_item_id" type="VARCHAR(16)">
+                <constraints nullable="true" foreignKeyName="skills_matrix_skill_fk1" references="skills_matrix_line_item(id)"/>
+            </column>
+        </createTable>
 
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_line_item (id, name, l0_description, l1_description, l2_description, l3_description)
-            VALUES (7,
-                    "Systems Programming",
-                    "Doesn’t know what a compiler, linker or interpreter is",
-                    "Basic understanding of compilers, linker and interpreters. Understands what assembly code is and how things work at the hardware level. Some knowledge of virtual memory and paging.",
-                    "Understands kernel mode vs. user mode, multi-threading, synchronization primitives and how they’re implemented, able to read assembly code. Understands how networks work, understanding of network protocols and socket level programming.",
-                    "Understands the entire programming stack, hardware (CPU + Memory + Cache + Interrupts + microcode), binary code, assembly, static and dynamic linking, compilation, interpretation, JIT compilation, garbage collection, heap, stack, memory addressing");
-        </sql>
-
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_topic (id, name)
-            VALUES (2, "Software Engineering");
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_line_item (id, name, l0_description, l1_description, l2_description, l3_description)
-            VALUES (8,
-                    "Source Code Version Control",
-                    "Doesn't use any version control.",
-                    "Can clone a repo, create branches, commit to them, push changes to a remote repo.",
-                    "Advanced Git 1",
-                    "Advanced Git 2");
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_line_item (id, name, l0_description, l1_description, l2_description, l3_description)
-            VALUES (9,
-                    "Build Automation",
-                    "Only knows how to build from IDE",
-                    "Knows how to build the system from the command line",
-                    "Can setup a script to build the basic system",
-                    "Can setup a script to build the system and also documentation, installers, generate release notes and tag the code in source control");
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_line_item (id, name, l0_description, l1_description, l2_description, l3_description)
-            VALUES (10,
-                    "Automated Testing",
-                    "Thinks that all testing is the job of the tester",
-                    "Has written automated unit tests and comes up with good unit test cases for the code that is being written",
-                    "Has written code in TDD manner",
-                    "Understands and is able to setup automated functional, load/performance and UI tests");
-        </sql>
-
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_topic_map (skills_matrix_id, skills_matrix_topic_id, sequence)
-            VALUES (1, 1, 1), (1, 2, 2);
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_topic_line_item_map (skills_matrix_topic_id, skills_matrix_line_item_id, sequence)
-            VALUES (1, 1, 1), (1, 2, 2), (1, 3, 3), (1, 4, 4), (1, 5, 5), (1, 6, 6), (1, 7, 7);
-        </sql>
-        <sql dbms="mysql">
-            INSERT INTO skills_matrix_topic_line_item_map (skills_matrix_topic_id, skills_matrix_line_item_id, sequence)
-            VALUES (2, 8, 1), (2, 9, 2), (2, 10, 3);
-        </sql>
+        <createTable tableName="skills_matrix_line_item_skill_map" catalogName="skillsmatrix_db" >
+            <column name="skills_matrix_line_item_id" type="VARCHAR(16)">
+                <constraints nullable="false" foreignKeyName="skills_matrix_li_sk_map_fk1" references="skills_matrix_line_item(id)"/>
+            </column>
+            <column name="skills_matrix_skill_id" type="VARCHAR(16)">
+                <constraints nullable="false" foreignKeyName="skills_matrix_li_sk_map_fk2" references="skills_matrix_skill(id)"/>
+            </column>
+            <column name="level" type="BIGINT(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sequence" type="BIGINT(10)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
     </changeSet>
+
 </databaseChangeLog>
 
 

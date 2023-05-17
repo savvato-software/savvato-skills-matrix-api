@@ -5,7 +5,6 @@ import com.savvato.skillsmatrix.controllers.dto.LineItemRequest;
 import com.savvato.skillsmatrix.controllers.dto.SkillRequest;
 import com.savvato.skillsmatrix.controllers.dto.SkillsMatrixRequest;
 import com.savvato.skillsmatrix.controllers.dto.TopicRequest;
-import com.savvato.skillsmatrix.dto.SkillsMatrixSummaryDTO;
 import com.savvato.skillsmatrix.entities.SkillsMatrix;
 import com.savvato.skillsmatrix.entities.SkillsMatrixLineItem;
 import com.savvato.skillsmatrix.entities.SkillsMatrixSkill;
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import retrofit2.http.Path;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -39,6 +37,15 @@ public class SkillsMatrixAPIController {
 
     }
 
+    @RequestMapping(value = {"/api/v1/skills-matrix/import"}, method = RequestMethod.POST)
+    public ResponseEntity importSkillsMatrix(HttpServletRequest request) throws IOException, ParseException {
+        String str = request.getReader().lines().collect(Collectors.joining());
+
+        skillsMatrixService.importSkillsMatrix(str);
+
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
     @RequestMapping(value = { "/api/v1/skills-matrix"}, method = RequestMethod.GET)
     public ResponseEntity<Iterable<SkillsMatrix>> getAll() {
         return ResponseEntity.status(HttpStatus.OK).body(skillsMatrixService.getAll());
@@ -50,7 +57,7 @@ public class SkillsMatrixAPIController {
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/{id}" }, method=RequestMethod.GET)
-    public SkillsMatrix get(@PathVariable Long id) {
+    public SkillsMatrix get(@PathVariable String id) {
         return skillsMatrixService.get(id);
     }
 
@@ -71,7 +78,7 @@ public class SkillsMatrixAPIController {
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/topic/{topicId}" }, method=RequestMethod.POST)
-    public SkillsMatrixTopic updateTopic(HttpServletRequest request, @PathVariable Long topicId) {
+    public SkillsMatrixTopic updateTopic(HttpServletRequest request, @PathVariable String topicId) {
         SkillsMatrixTopic rtn = null;
 
         try {
@@ -82,9 +89,7 @@ public class SkillsMatrixAPIController {
 
             String newName = ((JSONObject)obj.get("topic")).get("name").toString();
 
-            rtn = skillsMatrixService.updateTopic(
-                    topicId,
-                    newName);
+            rtn = skillsMatrixService.updateTopic(topicId, newName);
 
         } catch (IOException | ParseException e) {
             // TODO Auto-generated catch block
@@ -101,7 +106,7 @@ public class SkillsMatrixAPIController {
 
     @RequestMapping(value = { "/api/v1/skills-matrix/lineitem/{lineItemId}" }, method=RequestMethod.GET)
     public SkillsMatrixLineItem getLineItem(HttpServletRequest request, @PathVariable Long lineItemId) {
-        Optional<SkillsMatrixLineItem> rtn = this.skillsMatrixService.getLineItem(lineItemId);
+        Optional<SkillsMatrixLineItem> rtn = this.skillsMatrixService.getLineItem(lineItemId+"");
 
         if (rtn.isPresent())
             return rtn.get();
@@ -137,10 +142,10 @@ public class SkillsMatrixAPIController {
                 for (long y=0; y < numOfLineItems; y++) {
                     JSONArray liArr = (JSONArray)topicArr.get((int)y);
 
-                        long[] larr = new long[liArr.size()];
+                        String[] larr = new String[liArr.size()];
 
                         for(int z=0; z < liArr.size(); z++) {
-                            larr[z] = Long.parseLong(liArr.get(z)+"");
+                            larr[z] = liArr.get(z).toString();
                         }
 
                         skillsMatrixService.updateSequencesRelatedToALineItemAndItsSkills(larr);
@@ -176,13 +181,13 @@ public class SkillsMatrixAPIController {
                     str2 = str2.substring(1, str2.length() - 1);
                     List<String> list = Arrays.asList(str2.split("\\s*,\\s*"));
 
-                    long[] larr = new long[5];
+                    String[] larr = new String[5];
 
-                    larr[0] = Long.parseLong(list.get(0));
-                    larr[1] = Long.parseLong(list.get(1));
-                    larr[2] = Long.parseLong(list.get(2));
-                    larr[3] = Long.parseLong(list.get(3));
-                    larr[4] = Long.parseLong(list.get(4));
+                    larr[0] = list.get(0); // skills matrix id
+                    larr[1] = list.get(1); // topic id
+                    larr[2] = list.get(2); // its sequence
+                    larr[3] = list.get(3); // line item id
+                    larr[4] = list.get(4); // line item sequence
 
                     skillsMatrixService.updateSequencesRelatedToATopicAndItsLineItems(larr);
                 }

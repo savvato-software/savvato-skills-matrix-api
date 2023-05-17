@@ -9,7 +9,10 @@ import com.savvato.skillsmatrix.repositories.SkillsMatrixRepository;
 import com.savvato.skillsmatrix.repositories.SkillsMatrixSkillRepository;
 import com.savvato.skillsmatrix.repositories.SkillsMatrixTopicRepository;
 import com.savvato.skillsmatrix.utils.PermIdEntityUtils;
-import org.apache.commons.codec.digest.DigestUtils;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +43,28 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	@Autowired
 	SkillsMatrixSkillRepository skillsMatrixSkillRepository;
 
+	public SkillsMatrix importSkillsMatrix(String json) throws ParseException {
+		net.minidev.json.parser.JSONParser parser = new JSONParser();
+
+		JSONObject obj = (JSONObject)parser.parse(json);
+
+		JSONArray topics = (JSONArray)obj.get("topics");
+
+		JSONArray skills = (JSONArray)obj.get("skills");
+
+		JSONArray lineItems = (JSONArray)obj.get("lineItems");
+
+		JSONArray skillsMatrix = (JSONArray)obj.get("skillsMatrix");
+
+		return null;
+	}
+
 	public Iterable<SkillsMatrix> getAll() {
 		return skillsMatrixRepository.findAll();
 	}
 
 	@Override
-	public SkillsMatrix get(Long skillsMatrixId) {
+	public SkillsMatrix get(String skillsMatrixId) {
 		Optional<SkillsMatrix> opt = skillsMatrixRepository.findById(skillsMatrixId);
 		
 		List topicSequences = getTopicSequences(skillsMatrixId);
@@ -54,7 +73,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 		SkillsMatrix sm = null;
 		
-		ArrayList<Long> idsArr = new ArrayList<>();
+		ArrayList<String> idsArr = new ArrayList<>();
 		
 		if (opt.isPresent()) {
 			
@@ -128,17 +147,20 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 	@Override
 	public SkillsMatrix addSkillsMatrix(String name) {
+		return this.addSkillsMatrix(name, PermIdEntityUtils.getId(name));
+	}
+
+	private SkillsMatrix addSkillsMatrix(String name, String id) {
 		SkillsMatrix sm = new SkillsMatrix();
 
 		sm.setName(name);
-
-		PermIdEntityUtils.setPermId(sm);
+		sm.setId(id);
 
 		return skillsMatrixRepository.save(sm);
 	}
 
 	@Override
-	public SkillsMatrix updateSkillsMatrix(Long id, String name) {
+	public SkillsMatrix updateSkillsMatrix(String id, String name) {
 		Optional<SkillsMatrix> opt = skillsMatrixRepository.findById(id);
 		SkillsMatrix sm = null;
 
@@ -155,9 +177,9 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	
 	@Override
 	@Transactional
-	public SkillsMatrixTopic addTopic(Long skillsMatrixId, String topicName) {
+	public SkillsMatrixTopic addTopic(String skillsMatrixId, String topicName) {
 		SkillsMatrixTopic st = new SkillsMatrixTopic(topicName);
-		PermIdEntityUtils.setPermId(st);
+		PermIdEntityUtils.setId(st);
 
 		SkillsMatrixTopic rtn = skillsMatrixTopicRepository.save(st);
 		
@@ -178,12 +200,16 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		
 		return rtn;
 	}
+
+	private SkillsMatrixTopic addTopic(String skillsMatrixId, String topicName, String topicId) {
+		return null;
+	}
 	
 	@Override
 	@Transactional
-	public SkillsMatrixLineItem addLineItem(Long topicId, String lineItemName) {
+	public SkillsMatrixLineItem addLineItem(String topicId, String lineItemName) {
 		SkillsMatrixLineItem li = new SkillsMatrixLineItem(lineItemName);
-		PermIdEntityUtils.setPermId(li);
+		PermIdEntityUtils.setId(li);
 
 		SkillsMatrixLineItem rtn = skillsMatrixLineItemRepository.save(li);
 
@@ -197,46 +223,44 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		if (resultList.size() > 0 && resultList.get(0) != null)
 			currentMaxSequenceNum = Long.parseLong(resultList.get(0).toString());
 		
-		if (topicId > 0) {
+//		if (topicId > 0) {
 			em.createNativeQuery("INSERT INTO skills_matrix_topic_line_item_map (skills_matrix_topic_id, skills_matrix_line_item_id, sequence) VALUES (:topicId, :lineItemId, :sequence)")
 				.setParameter("topicId", topicId)
 				.setParameter("lineItemId", rtn.getId())
 				.setParameter("sequence", currentMaxSequenceNum + 1)
 				.executeUpdate();
-		}
+//		}
 
 		return rtn;
 	}
 
 	@Override
 	@Transactional
-	public SkillsMatrixSkill addSkill(Long lineItemId, Long level, String skillDescription) {
+	public SkillsMatrixSkill addSkill(String parentLineItemId, Long level, String skillDescription) {
 		SkillsMatrixSkill sms = new SkillsMatrixSkill(skillDescription);
-		PermIdEntityUtils.setPermId(sms);
+		PermIdEntityUtils.setId(sms);
+		sms.setDetailLineItemId(null);
 
 		SkillsMatrixSkill rtn = skillsMatrixSkillRepository.save(sms);
 
-		Long currentMaxSequenceNum = getMaxSequence(lineItemId, level);
+		Long currentMaxSequenceNum = getMaxSequence(parentLineItemId, level);
 
-		if (lineItemId > 0) {
-			em.createNativeQuery("INSERT INTO skills_matrix_line_item_skill_map (skills_matrix_line_item_id, skills_matrix_skill_id, level, sequence) VALUES (:lineItemId, :skillId, :level, :sequence)")
-					.setParameter("lineItemId", lineItemId)
-					.setParameter("skillId", rtn.getId())
-					.setParameter("level", level)
-					.setParameter("sequence", currentMaxSequenceNum + 1)
-					.executeUpdate();
-		}
+		em.createNativeQuery("INSERT INTO skills_matrix_line_item_skill_map (skills_matrix_line_item_id, skills_matrix_skill_id, level, sequence) VALUES (:lineItemId, :skillId, :level, :sequence)")
+				.setParameter("lineItemId", parentLineItemId)
+				.setParameter("skillId", rtn.getId())
+				.setParameter("level", level)
+				.setParameter("sequence", currentMaxSequenceNum + 1)
+				.executeUpdate();
 
 		rtn.setLevel(level);
 		rtn.setSequence(currentMaxSequenceNum + 1);
-		rtn.setDetailLineItemId(lineItemId);
 
 		return rtn;
 	}
 
 	@Override
 	@Transactional
-	public void deleteSkill(Long lineItemId, Long skillId) {
+	public void deleteSkill(String lineItemId, String skillId) {
 		em.createNativeQuery("DELETE FROM skills_matrix_line_item_skill_map m WHERE m.skills_matrix_line_item_id=:lineItemId AND m.skills_matrix_skill_id=:skillId")
 				.setParameter("lineItemId", lineItemId)
 				.setParameter("skillId", skillId)
@@ -255,7 +279,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	}
 
 	@Override
-	public SkillsMatrixSkill updateSkill(Long skillId, String desc, Long detailLineItemId) {
+	public SkillsMatrixSkill updateSkill(String skillId, String desc, String detailLineItemId) {
 		Optional<SkillsMatrixSkill> opt = skillsMatrixSkillRepository.findById(skillId);
 		SkillsMatrixSkill rtn = null;
 
@@ -264,10 +288,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 			skill.setDescription(desc);
 
-			skill.setDetailLineItemId(null);
-
-			if (detailLineItemId != null && detailLineItemId > 0)
-				skill.setDetailLineItemId(detailLineItemId);
+			skill.setDetailLineItemId(detailLineItemId);
 
 			rtn = skillsMatrixSkillRepository.save(skill);
 		}
@@ -276,12 +297,12 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	}
 	
 	@Override
-	public Optional<SkillsMatrixLineItem> getLineItem(Long lineItemId) {
+	public Optional<SkillsMatrixLineItem> getLineItem(String lineItemId) {
 		return skillsMatrixLineItemRepository.findById(lineItemId);
 	}
 	
 	@Override
-	public SkillsMatrixTopic updateTopic(Long topicId, String name) {
+	public SkillsMatrixTopic updateTopic(String topicId, String name) {
 		Optional<SkillsMatrixTopic> opt = skillsMatrixTopicRepository.findById(topicId);
 		SkillsMatrixTopic rtn = null;
 		
@@ -296,7 +317,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	}
 	
 	@Override
-	public SkillsMatrixLineItem updateLineItem(Long lineItemId, String lineItemName) {
+	public SkillsMatrixLineItem updateLineItem(String lineItemId, String lineItemName) {
 		Optional<SkillsMatrixLineItem> opt = skillsMatrixLineItemRepository.findById(lineItemId);
 		SkillsMatrixLineItem rtn = null;
 		
@@ -313,16 +334,16 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	
 	@Override
 	@Transactional
-	public boolean updateSequencesRelatedToATopicAndItsLineItems(long[] arr) {
-		Optional<SkillsMatrixTopic> opt = skillsMatrixTopicRepository.findById(arr[1]);
+	public boolean updateSequencesRelatedToATopicAndItsLineItems(String[] arr) {
+		Optional<SkillsMatrixTopic> opt = skillsMatrixTopicRepository.findById(arr[1] + ""); 		// TODO: Fix this hack.
 
 		// TODO: Pass JSON to the controller, and create a POJO model, instead of the array. @RequestBody
 		
 		if (opt.isPresent()) {
-			this.setTopicSequence(arr[1], arr[2]);
+			this.setTopicSequence(arr[1], Long.valueOf(arr[2]));
 			
-			if (arr[3] > 0 && arr[4] > 0)
-				this.setLineItemSequence(arr[1], arr[3], arr[4]);
+			if (arr[3] != null && arr[4] != null)
+				this.setLineItemSequence(arr[1], arr[3], Long.valueOf(arr[4]));
 		}
 		
 		return true;
@@ -330,13 +351,13 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 	@Override
 	@Transactional
-	public boolean updateSequencesRelatedToALineItemAndItsSkills(long[] arr) {
-		long lineItemId = arr[2];
+	public boolean updateSequencesRelatedToALineItemAndItsSkills(String[] arr) {
+		String lineItemId = arr[2];
 		int pos = 3;
 
 		while (pos < arr.length) {
-			long skillId = arr[pos++];
-			long sequence = arr[pos++];
+			String skillId = arr[pos++];
+			long sequence = Long.valueOf(arr[pos++]);
 
 			setSkillSequence(lineItemId, skillId, sequence);
 		}
@@ -344,7 +365,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		return true;
 	}
 
-	private long getMaxSequence(long lineItemId, long level) {
+	private long getMaxSequence( String lineItemId, long level) {
 		List resultList =
 				em.createNativeQuery("SELECT max(sequence) FROM skills_matrix_line_item_skill_map where skills_matrix_line_item_id=:lineItemId and level=:level")
 						.setParameter("lineItemId", lineItemId)
@@ -358,7 +379,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		return rtn;
 	}
 
-	private long getSkillLevel(long skillsMatrixId, long skillId) {
+	private long getSkillLevel(String skillsMatrixId, String skillId) {
 		long rtn = -1;
 		List skillSequences = getSkillSequences(skillsMatrixId);
 
@@ -367,7 +388,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		while (!found) {
 			Object[] row = (Object[]) skillSequences.get(i++);
 
-			if (Long.parseLong(row[2]+"") == skillId) {
+			if (row[2].equals(skillId)) {
 				found = true;
 				rtn = Long.parseLong(row[3]+"");
 			}
@@ -380,7 +401,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 	@Override
 	@Transactional
-	public boolean updateSkillLevel(long skillsMatrixId, long lineItemId, long skillId, long destinationLevel) {
+	public boolean updateSkillLevel(String skillsMatrixId,  String lineItemId,  String skillId, long destinationLevel) {
 		// 	get the max sequence of the destination level
 		long maxSequence = getMaxSequence(lineItemId, destinationLevel);
 
@@ -408,7 +429,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 		while (!found) {
 			row = arr.get(index++);
-			found = Long.parseLong(row[1]+"") == skillId;
+			found = row[1].equals(skillId);
 		}
 
 		// while there is a next row
@@ -432,7 +453,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		return true;
 	}
 
-	private void setSkillSequence(Long lineItemId, Long skillId, Long sequence) {
+	private void setSkillSequence(String lineItemId, String skillId, Long sequence) {
 		em.createNativeQuery("UPDATE skills_matrix_line_item_skill_map smliskm SET smliskm.sequence=:sequence WHERE smliskm.skills_matrix_line_item_id=:lineItemId AND smliskm.skills_matrix_skill_id=:skillId")
 				.setParameter("lineItemId", lineItemId)
 				.setParameter("skillId", skillId)
@@ -440,14 +461,14 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 				.executeUpdate();
 	}
 
-	private void setTopicSequence(Long topicId, Long sequence) {
+	private void setTopicSequence(String topicId, Long sequence) {
 		em.createNativeQuery("UPDATE skills_matrix_topic_map smtm SET smtm.sequence = :sequence WHERE smtm.skills_matrix_topic_id = :topicId")
 			.setParameter("topicId", topicId)
 			.setParameter("sequence", sequence)
 			.executeUpdate();
 	}
 	
-	private void setLineItemSequence(Long topicId, Long lineItemId, Long sequence) {
+	private void setLineItemSequence(String topicId, String lineItemId, Long sequence) {
 		em.createNativeQuery("UPDATE skills_matrix_topic_line_item_map smlitm SET smlitm.sequence=:sequence WHERE smlitm.skills_matrix_topic_id=:topicId AND smlitm.skills_matrix_line_item_id=:lineItemId")
 		.setParameter("topicId", topicId)
 		.setParameter("lineItemId", lineItemId)
@@ -461,28 +482,28 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 	 * @param skillsMatrixId
 	 * @return
 	 */
-	private List getTopicSequences(Long skillsMatrixId) {
+	private List getTopicSequences(String skillsMatrixId) {
 		List resultList = em.createNativeQuery("SELECT smt.id as topic_id, smtm.sequence FROM skills_matrix sm, skills_matrix_topic smt, skills_matrix_topic_map smtm WHERE sm.id=:skillsMatrixId AND smtm.skills_matrix_id=sm.id AND smtm.skills_matrix_topic_id=smt.id;")
 				.setParameter("skillsMatrixId", skillsMatrixId).getResultList();
 		
 		return resultList;
 	}
 	
-	private List getLineItemSequences(Long skillsMatrixId) {
+	private List getLineItemSequences(String skillsMatrixId) {
 		List resultList = em.createNativeQuery("select smt.id as topic_id, smli.id as skills_matrix_line_item_id, smtlim.sequence FROM skills_matrix sm, skills_matrix_topic smt, skills_matrix_topic_map smtm, skills_matrix_line_item smli, skills_matrix_topic_line_item_map smtlim WHERE sm.id=:skillsMatrixId and smtm.skills_matrix_id=sm.id and smtm.skills_matrix_topic_id=smt.id and smt.id=smtlim.skills_matrix_topic_id and smtlim.skills_matrix_line_item_id=smli.id;")
 				.setParameter("skillsMatrixId", skillsMatrixId).getResultList();
 
 		return resultList;
 	}
 
-	private List getSkillSequences(Long skillsMatrixId) {
+	private List getSkillSequences(String skillsMatrixId) {
 		List resultList = em.createNativeQuery("select smt.id as topic_id, smli.id as skills_matrix_line_item_id, smsk.id as skills_matrix_skill_id, smliskm.level, smliskm.sequence FROM skills_matrix sm, skills_matrix_topic smt, skills_matrix_topic_map smtm, skills_matrix_line_item smli, skills_matrix_topic_line_item_map smtlim, skills_matrix_skill smsk, skills_matrix_line_item_skill_map smliskm WHERE sm.id=:skillsMatrixId and smtm.skills_matrix_id=sm.id and smtm.skills_matrix_topic_id=smt.id and smt.id=smtlim.skills_matrix_topic_id and smtlim.skills_matrix_line_item_id=smli.id and smli.id=smliskm.skills_matrix_line_item_id and smliskm.skills_matrix_skill_id=smsk.id ORDER BY topic_id, skills_matrix_line_item_id, level, sequence;")
 				.setParameter("skillsMatrixId", skillsMatrixId).getResultList();
 
 		return resultList;
 	}
 
-	private List getSkillLineItemMapInfoPerLevel(Long lineItemId, Long level) {
+	private List getSkillLineItemMapInfoPerLevel(String lineItemId, Long level) {
 		List resultList = em.createNativeQuery("select * from skills_matrix_line_item_skill_map m where m.skills_matrix_line_item_id=:lineItemId AND m.level=:level ORDER BY skills_matrix_line_item_id, level, sequence;")
 				.setParameter("lineItemId", lineItemId)
 				.setParameter("level", level)
@@ -500,7 +521,7 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		while (rtn == null && x < topicSequences.size()) {
 			Object[] ts = (Object[])topicSequences.get(x++);
 			
-			if (((BigInteger)ts[0]).longValue() == topic.getId()) {
+			if (ts[0].equals(topic.getId())) {
 				topic.setSequence(((BigInteger)ts[1]).longValue());
 				rtn = topic;
 			}
@@ -509,14 +530,14 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		return rtn;
 	}
 	
-	private SkillsMatrixLineItem setSequenceOnLineItem(Long topicId, SkillsMatrixLineItem smli, List lineItemSequences) {
+	private SkillsMatrixLineItem setSequenceOnLineItem(String topicId, SkillsMatrixLineItem smli, List lineItemSequences) {
 		int x = 0;
 		SkillsMatrixLineItem rtn = null;
 
 		while (rtn == null && x < lineItemSequences.size()) {
 			Object[] lis = (Object[])lineItemSequences.get(x++);
 
-			if (((BigInteger)lis[0]).longValue() == topicId && ((BigInteger)lis[1]).longValue() == smli.getId()) {
+			if (lis[0].equals(topicId) && lis[1].equals(smli.getId())) {
 				 smli.setSequence(((BigInteger)lis[2]).longValue());
 				rtn =  smli;
 			}
@@ -525,16 +546,16 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		return rtn;
 	}
 
-	private SkillsMatrixSkill setSequenceAndLevelOnSkill(Long topicId, Long lineItemId, SkillsMatrixSkill smsk, List skillsSequences) {
+	private SkillsMatrixSkill setSequenceAndLevelOnSkill(String topicId, String lineItemId, SkillsMatrixSkill smsk, List skillsSequences) {
 		int x = 0;
 		SkillsMatrixSkill rtn = null;
 
 		while (rtn == null && x < skillsSequences.size()) {
 			Object[] sks = (Object[])skillsSequences.get(x++);
 
-			if (((BigInteger)sks[0]).longValue() == topicId
-					&& ((BigInteger)sks[1]).longValue() == lineItemId
-					&& ((BigInteger)sks[2]).longValue() == smsk.getId()) {
+			if (sks[0].equals(topicId)
+					&& sks[1].equals(lineItemId)
+					&& sks[2].equals(smsk.getId())) {
 				smsk.setLevel(((BigInteger)sks[3]).longValue());
 				smsk.setSequence(((BigInteger)sks[4]).longValue());
 				rtn = smsk;

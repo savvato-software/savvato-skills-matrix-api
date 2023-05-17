@@ -4,17 +4,16 @@ import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-public class SkillsMatrix extends PermIdEntity {
+public class SkillsMatrix implements PermIdEntityBehavior {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	public Long getId() {
+	private String id;
+
+	public String getId() {
 		return id;
 	}
-	
-	public void setId(Long id) {
+
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -48,7 +47,8 @@ public class SkillsMatrix extends PermIdEntity {
     	this.topics = topics;
     }
     
-	public SkillsMatrix(String name) {
+	public SkillsMatrix(String id, String name) {
+		this.id = id;
 		this.name = name;
 	}
 	

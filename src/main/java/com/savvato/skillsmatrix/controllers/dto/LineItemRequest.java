@@ -1,7 +1,7 @@
 package com.savvato.skillsmatrix.controllers.dto;
 
 public class LineItemRequest {
-    public Long topicId;
+    public String topicId;
     public String lineItemName;
-    public Long lineItemId;
+    public String lineItemId;
 }
