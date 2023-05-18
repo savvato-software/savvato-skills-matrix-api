@@ -5,6 +5,7 @@ import com.savvato.skillsmatrix.controllers.dto.LineItemRequest;
 import com.savvato.skillsmatrix.controllers.dto.SkillRequest;
 import com.savvato.skillsmatrix.controllers.dto.SkillsMatrixRequest;
 import com.savvato.skillsmatrix.controllers.dto.TopicRequest;
+import com.savvato.skillsmatrix.dto.SkillsMatrixSummaryDTO;
 import com.savvato.skillsmatrix.entities.SkillsMatrix;
 import com.savvato.skillsmatrix.entities.SkillsMatrixLineItem;
 import com.savvato.skillsmatrix.entities.SkillsMatrixSkill;
@@ -47,13 +48,13 @@ public class SkillsMatrixAPIController {
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix"}, method = RequestMethod.GET)
-    public ResponseEntity<Iterable<SkillsMatrix>> getAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(skillsMatrixService.getAll());
+    public ResponseEntity<Iterable<SkillsMatrixSummaryDTO>> getAll() {
+        return ResponseEntity.status(HttpStatus.OK).body(skillsMatrixService.getAllMatrixSummaries());
     }
     @RequestMapping(value = { "/api/v1/skills-matrix"}, method = RequestMethod.PUT)
-    public ResponseEntity<Iterable<SkillsMatrix>> updateSkillsMatrixName(@RequestBody @Valid SkillsMatrixRequest req) {
-        skillsMatrixService.updateSkillsMatrix(req.skillsMatrixId, req.name);
-        return ResponseEntity.status(HttpStatus.OK).body(skillsMatrixService.getAll());
+    public ResponseEntity<SkillsMatrixSummaryDTO> updateSkillsMatrixName(@RequestBody @Valid SkillsMatrixRequest req) {
+        SkillsMatrixSummaryDTO dto = skillsMatrixService.updateSkillsMatrix(req.skillsMatrixId, req.name);
+        return ResponseEntity.status(HttpStatus.OK).body(dto);
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/{id}" }, method=RequestMethod.GET)

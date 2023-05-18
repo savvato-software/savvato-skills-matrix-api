@@ -1,5 +1,6 @@
 package com.savvato.skillsmatrix.services;
 
+import com.savvato.skillsmatrix.dto.SkillsMatrixSummaryDTO;
 import com.savvato.skillsmatrix.entities.SkillsMatrix;
 import com.savvato.skillsmatrix.entities.SkillsMatrixLineItem;
 import com.savvato.skillsmatrix.entities.SkillsMatrixSkill;
@@ -13,20 +14,24 @@ public interface SkillsMatrixService {
 
 	SkillsMatrix importSkillsMatrix(String str) throws ParseException;
 
-	public Iterable<SkillsMatrix> getAll();
+	public Iterable<SkillsMatrixSummaryDTO> getAllMatrixSummaries();
 	public SkillsMatrix get(String id);
 
 	SkillsMatrix addSkillsMatrix(String name);
-	SkillsMatrix updateSkillsMatrix(String skillsMatrixId, String name);
+	SkillsMatrix addSkillsMatrix(String name, String skillsMatrixId);
+	SkillsMatrixSummaryDTO updateSkillsMatrix(String skillsMatrixId, String name);
 
 	public SkillsMatrixTopic addTopic(String skillsMatrixId, String topicName);
+	public SkillsMatrixTopic addTopic(String skillsMatrixId, String topicName, String topicId);
 	public SkillsMatrixTopic updateTopic(String topicId, String name);
 
 	public SkillsMatrixLineItem addLineItem(String topicId, String lineItemName);
+	public SkillsMatrixLineItem addLineItem(String topicId, String lineItemName, String lineItemId);
 	public Optional<SkillsMatrixLineItem> getLineItem(String lineItemId);
 	public SkillsMatrixLineItem updateLineItem(String lineItemId, String lineItemName);
 
 	public SkillsMatrixSkill addSkill(String lineItemId, Long level, String skillDescription);
+	public SkillsMatrixSkill addSkill(String lineItemId, Long level, String skillDescription, String skillId);
 
 	public void deleteSkill(String lineItemId, String skillId);
 
