@@ -204,11 +204,19 @@ public class SkillsMatrixAPIController {
 
     @RequestMapping(value = { "/api/v1/skills-matrix/skill/new" }, method=RequestMethod.POST)
     public SkillsMatrixSkill newSkill(@RequestBody @Valid SkillRequest req) {
+
+        if (req.lineItemId.isEmpty() || req.skillLevel == null || req.skillDescription.isEmpty())
+            throw new IllegalArgumentException("lineItemId, skillLevel and skillDescription must have values. lineItemId = " + req.lineItemId + ", skillLevel = " + req.skillLevel + ", skillDescription = " + req.skillDescription);
+
         return this.skillsMatrixService.addSkill(req.lineItemId, req.skillLevel, req.skillDescription);
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/skill/delete" }, method=RequestMethod.DELETE)
     public void deleteSkill(@RequestBody @Valid SkillRequest req) {
+
+        if (req.lineItemId.isEmpty() || req.skillId.isEmpty())
+            throw new IllegalArgumentException("lineItemId and skillId must have values. lineItemId = " + req.lineItemId + ", skillId = " + req.skillId);
+
         this.skillsMatrixService.deleteSkill(req.lineItemId, req.skillId);
     }
 
