@@ -22,16 +22,17 @@ public interface SkillsMatrixService {
 	SkillsMatrixSummaryDTO updateSkillsMatrix(String skillsMatrixId, String name);
 
 	public SkillsMatrixTopic addTopic(String skillsMatrixId, String topicName);
-	public SkillsMatrixTopic addTopic(String skillsMatrixId, String topicName, String topicId);
+	public SkillsMatrixTopic addTopic(String skillsMatrixId, String topicName, String topicId, Long sequence);
 	public SkillsMatrixTopic updateTopic(String topicId, String name);
 
 	public SkillsMatrixLineItem addLineItem(String topicId, String lineItemName);
 	public SkillsMatrixLineItem addLineItem(String topicId, String lineItemName, String lineItemId);
+	public SkillsMatrixLineItem addLineItem(String topicId, String lineItemName, String lineItemId, Long sequence);
 	public Optional<SkillsMatrixLineItem> getLineItem(String lineItemId);
 	public SkillsMatrixLineItem updateLineItem(String lineItemId, String lineItemName);
 
 	public SkillsMatrixSkill addSkill(String lineItemId, Long level, String skillDescription);
-	public SkillsMatrixSkill addSkill(String lineItemId, Long level, String skillDescription, String skillId);
+	public SkillsMatrixSkill addSkill(String lineItemId, Long level, String skillDescription, String skillId, String detailLineItemId, Long sequence);
 
 	public void deleteSkill(String lineItemId, String skillId);
 
