@@ -3,7 +3,7 @@
   become: true
   vars:
     ansible_python_interpreter: /usr/bin/python3  # Specify the path to Python 3 interpreter
-    mysql_database: skillsmatrix_db # Set the desired name for the database
+    mysql_database: dmpj_db # Set the desired name for the database
     mysql_root_password: supersecure  # Set the desired root password for MySQL
   tasks:
     - name: Update package cache
@@ -21,6 +21,24 @@
         name: 
           - net-tools
         state: present
+
+    - name: Retrieve dotvimrc file
+      get_url:
+        url: http://www.haxwell.org/dotvimrc
+        dest: /tmp/dotvimrc
+
+    - name: Copy dotvimrc to /home/ubuntu/.vimrc
+      copy:
+        src: /tmp/dotvimrc
+        dest: /home/ubuntu/.vimrc
+        remote_src: yes
+
+    - name: Copy dotvimrc to /root/.vimrc
+      become: true
+      copy:
+        src: /tmp/dotvimrc
+        dest: /root/.vimrc
+        remote_src: yes
 
     - name: Install Java 19
       apt:
@@ -50,7 +68,7 @@
         state: present
         executable: pip3
 
-    - name: Create database skillsmatrix_db 
+    - name: Create database dmpj_db 
       mysql_db:
         login_unix_socket: /var/run/mysqld/mysqld.sock
         state: present
@@ -58,18 +76,18 @@
         login_user: root
         login_password: "{{ mysql_root_password }}"
 
-    - name: Create user smdbuser
+    - name: Create user dmpjdbuser
       mysql_user:
         login_unix_socket: /var/run/mysqld/mysqld.sock
         state: present
-        name: smdbuser
+        name: dmpjdbuser
         password: supersecure
 
-    - name: Grant privileges to smdbuser
+    - name: Grant privileges to dmpjdbuser
       mysql_user:
         login_unix_socket: /var/run/mysqld/mysqld.sock
         state: present
-        name: smdbuser 
+        name: dmpjdbuser 
         password: supersecure
         priv: "*.*:ALL"
         host: localhost
@@ -102,11 +120,13 @@
         name: skills-matrix-api.service
         state: started
         enabled: yes
-
-    - name: Run JAR file in the background
-      shell: java -jar /opt/app/skills-matrix-api.jar > /opt/app/server.log 2>&1 &
-      async: 60
-      poll: 0
-      register: jar_execution
-
+        
+- name: Reboot the machine
+  hosts: all
+  become: true
+  tasks:
+    - name: Reboot the machine
+      reboot:
+        msg: "Rebooting the machine"
+        pre_reboot_delay: 10
 
