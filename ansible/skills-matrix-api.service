@@ -1,0 +1,12 @@
+[Unit]
+Description=Skills Matrix Backend API
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/java -jar /opt/app/skills-matrix-api.jar > /opt/app/server.log 2>&1
+WorkingDirectory=/opt/app
+User=your_username
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
