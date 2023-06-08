@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.savvato</groupId>
-	<artifactId>skills-matrix-api</artifactId>
+	<artifactId>savvato-skills-matrix-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>skills-matrix-api</name>
 	<description>An API which manages and provides access to skills matrices.</description>
