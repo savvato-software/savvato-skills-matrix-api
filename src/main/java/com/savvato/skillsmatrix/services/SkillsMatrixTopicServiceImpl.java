@@ -40,14 +40,14 @@ public class SkillsMatrixTopicServiceImpl implements SkillsMatrixTopicService {
 			if (existingLineItem.isPresent()) {
 				SkillsMatrixLineItem _existingLineItem = existingLineItem.get();
 
-				Long existingLineItemParentTopicId = 0L;
+				String existingLineItemParentTopicId = null;
 				// query for the existingLineItem's parent topic id
 				List resultList = em.createNativeQuery("SELECT skills_matrix_topic_id FROM skills_matrix_topic_line_item_map WHERE skills_matrix_line_item_id=:existingLineItemId")
 					.setParameter("existingLineItemId", existingLineItemId)
 					.getResultList();
 
 				if (resultList.size() > 0 && resultList.get(0) != null) {
-					existingLineItemParentTopicId = Long.parseLong(resultList.get(0).toString());
+					existingLineItemParentTopicId = resultList.get(0).toString();
 				}
 
 				// query for the existingLineItem's sequence number

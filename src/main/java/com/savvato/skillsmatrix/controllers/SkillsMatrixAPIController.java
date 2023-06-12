@@ -149,6 +149,8 @@ public class SkillsMatrixAPIController {
                             larr[z] = liArr.get(z).toString();
                         }
 
+                        removeQuotes(larr);
+
                         skillsMatrixService.updateSequencesRelatedToALineItemAndItsSkills(larr);
                     }
                 }
@@ -190,6 +192,8 @@ public class SkillsMatrixAPIController {
                     larr[3] = list.get(3); // line item id
                     larr[4] = list.get(4); // line item sequence
 
+                    removeQuotes(larr);
+
                     skillsMatrixService.updateSequencesRelatedToATopicAndItsLineItems(larr);
                 }
             }
@@ -200,6 +204,12 @@ public class SkillsMatrixAPIController {
         }
 
         return true;
+    }
+
+    private void removeQuotes(String[] arr) {
+        for (int x=0; x < arr.length; x++) {
+            arr[x] = arr[x].replace("\"", "");
+        }
     }
 
     @RequestMapping(value = { "/api/v1/skills-matrix/skill/new" }, method=RequestMethod.POST)
