@@ -480,35 +480,18 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 				.setParameter("sequence", maxSequence + 1)
 				.executeUpdate();
 
-		// get skills_matrix_line_item_skill_map for orginal level
-		List<Long[]> arr = getSkillLineItemMapInfoPerLevel(lineItemId, originalSkillLevel);
-
-		// find the index of the row we're moving
-		int index = 0;
-		boolean found = false;
-		Object[] row = null;
-
-		while (!found) {
-			row = arr.get(index++);
-			found = row[1].equals(skillId);
-		}
-
-		// while there is a next row
-		while (index < arr.size()) {
-			row = arr.get(index++);
-			// set the sequence to its value -1
-			em.createNativeQuery("UPDATE skills_matrix_line_item_skill_map smliskm SET smliskm.sequence=:sequence WHERE smliskm.skills_matrix_line_item_id=:lineItemId AND smliskm.skills_matrix_skill_id=:skillId")
-					.setParameter("lineItemId", lineItemId)
-					.setParameter("skillId", row[1])
-					.setParameter("sequence", Long.parseLong(row[3]+"") - 1)
-					.executeUpdate();
-		}
-
 		em.createNativeQuery("DELETE FROM skills_matrix_line_item_skill_map smliskm WHERE smliskm.skills_matrix_line_item_id=:lineItemId AND smliskm.skills_matrix_skill_id=:skillId AND smliskm.level=:level AND smliskm.sequence=:sequence")
 				.setParameter("lineItemId", lineItemId)
 				.setParameter("skillId", skillId)
 				.setParameter("level", originalSkillLevel)
 				.setParameter("sequence", origLevelMaxSequence)
+				.executeUpdate();
+
+		//  update the sequence of the rows for the original level
+		em.createNativeQuery("UPDATE skills_matrix_line_item_skill_map SET sequence=sequence-1 WHERE skills_matrix_line_item_id=:lineItemId AND level=:level AND sequence>:origLevelMaxSequence")
+				.setParameter("lineItemId", lineItemId)
+				.setParameter("level", originalSkillLevel)
+				.setParameter("origLevelMaxSequence", origLevelMaxSequence)
 				.executeUpdate();
 
 		return true;
