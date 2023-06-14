@@ -458,7 +458,19 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 		return rtn;
 	}
 
+	private long getSkillSequence(String lineItemId, String skillId) {
+		List resultList =
+				em.createNativeQuery("SELECT sequence FROM skills_matrix_line_item_skill_map where skills_matrix_line_item_id=:lineItemId and skills_matrix_skill_id=:skillId")
+						.setParameter("lineItemId", lineItemId)
+						.setParameter("skillId", skillId)
+						.getResultList();
 
+		long rtn = 0;
+		if (resultList.size() > 0 && resultList.get(0) != null)
+			rtn = Long.parseLong(resultList.get(0).toString());
+
+		return rtn;
+	}
 
 	@Override
 	@Transactional
@@ -468,6 +480,8 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 
 		//  get the level the skill is currently at
 		long originalSkillLevel = getSkillLevel(skillsMatrixId, skillId);
+
+		long originalSequence = getSkillSequence(lineItemId, skillId);
 
 		//  get the max sequence for the original level
 		long origLevelMaxSequence = getMaxSequence(lineItemId, originalSkillLevel);
@@ -484,14 +498,14 @@ public class SkillsMatrixServiceImpl implements SkillsMatrixService {
 				.setParameter("lineItemId", lineItemId)
 				.setParameter("skillId", skillId)
 				.setParameter("level", originalSkillLevel)
-				.setParameter("sequence", origLevelMaxSequence)
+				.setParameter("sequence", originalSequence)
 				.executeUpdate();
 
 		//  update the sequence of the rows for the original level
-		em.createNativeQuery("UPDATE skills_matrix_line_item_skill_map SET sequence=sequence-1 WHERE skills_matrix_line_item_id=:lineItemId AND level=:level AND sequence>:origLevelMaxSequence")
+		em.createNativeQuery("UPDATE skills_matrix_line_item_skill_map SET sequence=sequence-1 WHERE skills_matrix_line_item_id=:lineItemId AND level=:level AND sequence>:originalSequence")
 				.setParameter("lineItemId", lineItemId)
 				.setParameter("level", originalSkillLevel)
-				.setParameter("origLevelMaxSequence", origLevelMaxSequence)
+				.setParameter("originalSequence", originalSequence)
 				.executeUpdate();
 
 		return true;
