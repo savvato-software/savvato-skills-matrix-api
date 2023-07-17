@@ -3,7 +3,7 @@
   become: true
   vars:
     ansible_python_interpreter: /usr/bin/python3  # Specify the path to Python 3 interpreter
-    mysql_database: dmpj_db # Set the desired name for the database
+    mysql_database: skillsmatrix_db # Set the desired name for the database
     mysql_root_password: supersecure  # Set the desired root password for MySQL
   tasks:
     - name: Update package cache
@@ -15,60 +15,23 @@
         upgrade: yes
         autoremove: yes
         autoclean: yes
+        
+    - name: Include iptables rules
+      include_tasks: ~/src/devops/ansible/includes/iptables-rules.yaml
 
-    - name: Install APT apps 
-      apt:
-        name: 
-          - net-tools
-        state: present
+    - name: Pull Domain Certification file from S3
+      aws_s3:
+        bucket: savvato-domain-certifications
+        object: skills-matrix-api.staging.savvato.com.p12
+        dest: /usr/share/skills-matrix-api.staging.savvato.com.p12
+        mode: get
 
-    - name: Retrieve dotvimrc file
-      get_url:
-        url: http://www.haxwell.org/dotvimrc
-        dest: /tmp/dotvimrc
+    - name: Set Domain Certification file permissions
+      command: chmod 400 /usr/share/skills-matrix-api.staging.savvato.com.p12
+    - name: 
+      command: chown -R ubuntu:ubuntu /usr/share/skills-matrix-api.staging.savvato.com.p12
 
-    - name: Copy dotvimrc to /home/ubuntu/.vimrc
-      copy:
-        src: /tmp/dotvimrc
-        dest: /home/ubuntu/.vimrc
-        remote_src: yes
-
-    - name: Copy dotvimrc to /root/.vimrc
-      become: true
-      copy:
-        src: /tmp/dotvimrc
-        dest: /root/.vimrc
-        remote_src: yes
-
-    - name: Install Java 19
-      apt:
-        name: openjdk-19-jdk
-        state: present
-
-    - name: Install Python 3
-      apt:
-        name: 
-        - python3
-        - python3-pip
-        - python3-botocore
-        - python3-boto3
-        state: present
-
-    - name: Install MySQL
-      apt:
-        name: mysql-server
-        state: present
-      vars:
-        mysql_user: myuser  # Set the desired username for the new MySQL user
-        mysql_password: mypassword  # Set the desired password for the new MySQL user
-
-    - name: Install pymysql
-      pip:
-        name: pymysql
-        state: present
-        executable: pip3
-
-    - name: Create database dmpj_db 
+    - name: Create database skillsmatrix_db 
       mysql_db:
         login_unix_socket: /var/run/mysqld/mysqld.sock
         state: present
@@ -76,56 +39,72 @@
         login_user: root
         login_password: "{{ mysql_root_password }}"
 
-    - name: Create user dmpjdbuser
+    - name: Create user smdbuser
       mysql_user:
         login_unix_socket: /var/run/mysqld/mysqld.sock
         state: present
-        name: dmpjdbuser
+        name: smdbuser
         password: supersecure
 
-    - name: Grant privileges to dmpjdbuser
+    - name: Grant privileges to smdbuser
       mysql_user:
         login_unix_socket: /var/run/mysqld/mysqld.sock
         state: present
-        name: dmpjdbuser 
+        name: smdbuser 
         password: supersecure
         priv: "*.*:ALL"
         host: localhost
         append_privs: yes
 
-- name: Ensure /opt/app directory exists
-  hosts: vm01
-  become: true
-  tasks:
     - name: Create /opt/app directory if it doesn't exist
       file:
         path: /opt/app
         state: directory
-        mode: '0755'
+      
+    - name: Wait for /opt/app directory to be created
+      wait_for:
+        path: /opt/app
+      
+    - name: Create application.properties file
+      file:
+        path: /opt/app/application.properties
+        state: touch
+
+    - name: Write to application.properties file
+      blockinfile:
+        path: /opt/app/application.properties
+        block: |
+          server.port=8443
+          server.ssl.keyAlias=tomcat
+          server.ssl.key-store=/usr/share/skills-matrix-api.staging.savvato.com.p12
+          server.ssl.key-store-password=supersecure!
+          server.ssl.key-password=supersecure!
+        
+    - name: 
+      command: chown -R ubuntu:ubuntu /opt
 
     - name: Pull JAR file from S3
       aws_s3:
         bucket: savvato-builds-bucket 
-        object: skills-matrix-api.jar
+        object: savvato-skills-matrix-api.jar
         dest: /opt/app/skills-matrix-api.jar
         mode: get
 
     - name: Copy systemd service file
+      become: true
       copy:
-        src:  skills-matrix-api.service
+        src:  systemd.service
         dest: /etc/systemd/system/skills-matrix-api.service
 
     - name: Enable and start the service
+      become: true    
       systemd:
         name: skills-matrix-api.service
         state: started
         enabled: yes
         
-- name: Reboot the machine
-  hosts: all
-  become: true
-  tasks:
     - name: Reboot the machine
+      become: true
       reboot:
         msg: "Rebooting the machine"
         pre_reboot_delay: 10
